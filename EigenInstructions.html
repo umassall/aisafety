@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Mathjax -->
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <title>AI Safety &middot; Eigen Instructions</title>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+      <a class="navbar-brand" href="index.html">AI Safety</a>
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="overview.html">Overview</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="paper.html">Paper</a>
+        </li>
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+            Tutorials
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="tutorial0.html">Tutorial Overview</a>
+            <a class="dropdown-item" href="tutorial1.html">1. Seldonian algorithm review</a>
+            <a class="dropdown-item" href="tutorial2.html">2. Example problem</a>
+            <a class="dropdown-item" href="tutorial3.html">3. A simple Seldonian algorithm</a>
+            <hr>
+            <h6 class="dropdown-header text-primary"><b>C++</b></h6>
+            <a class="dropdown-item" href="tutorial4cpp.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item" href="tutorial5cpp.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item" href="tutorial6cpp.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <h6 class="dropdown-header text-success"><b>Python (COMING SOON)</b></h6>
+            <a class="dropdown-item disabled" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item disabled" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item disabled" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <hr>
+            <a class="dropdown-item" href="tutorial7.html">7. Plotting</a>
+            <a class="dropdown-item" href="tutorial8.html">8. Advanced Topics</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="code.html">Code</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="about.html">About Us</a>
+        </li>
+      </ul>
+      <!--<ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="donate.html">Donate</a>
+        </li>
+      </ul>-->
+    </nav>
+
+    <!-- Begin Content -->
+    <div class="container">
+      <div class="card bg-light mt-2">
+        <div class="card-body">
+          <h2>Intalling Eigen</h2>
+          <p align="justify">
+            Eigen is a head-only library. This means that installation is incredibly simple. Head to the Eigen homepage <a href="http://eigen.tuxfamily.org/index.php?title=Main_Page">here</a>. Near the top-right, under "Get it", download the latest stable release. This will come as a compressed folder, like a .zip file. Open this compressed folder. It should contain a single directory with a name like <em>eigen-eigen-323c052e1731</em>. Inside of this directory will be many subdirectories and files. You only need the subdirectory <em>Eigen</em> (under 5MB currently). Copy the <em>Eigen</em> folder into the include path for your C++ project, and you're done&mdash;you are ready to use Eigen with the include statement <kbd>#include &lt;Eigen/Dense&gt;</kbd>.
+          </p>
+        </div>
+      </div>
+
+      <hr class="my-4">
+    </div>
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>

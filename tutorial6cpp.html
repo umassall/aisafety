@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Mathjax -->
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <title>AI Safety &middot; Tutorial 6</title>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+      <a class="navbar-brand" href="index.html">AI Safety</a>
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="overview.html">Overview</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="paper.html">Paper</a>
+        </li>
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+            Tutorials
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="tutorial0.html">Tutorial Overview</a>
+            <a class="dropdown-item" href="tutorial1.html">1. Seldonian algorithm review</a>
+            <a class="dropdown-item" href="tutorial2.html">2. Example problem</a>
+            <a class="dropdown-item" href="tutorial3.html">3. A simple Seldonian algorithm</a>
+            <hr>
+            <h6 class="dropdown-header text-primary"><b>C++</b></h6>
+            <a class="dropdown-item" href="tutorial4cpp.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item" href="tutorial5cpp.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item disabled" href="tutorial6cpp.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <h6 class="dropdown-header text-success"><b>Python (COMING SOON)</b></h6>
+            <a class="dropdown-item disabled" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item disabled" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item disabled" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <hr>
+            <a class="dropdown-item" href="tutorial7.html">7. Plotting</a>
+            <a class="dropdown-item" href="tutorial8.html">8. Advanced Topics</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="code.html">Code</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="about.html">About Us</a>
+        </li>
+      </ul>
+      <!--<ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="donate.html">Donate</a>
+        </li>
+      </ul>-->
+    </nav>
+
+    <!-- Begin Content -->
+    <div class="container">
+      <div class="card bg-light mt-2">
+        <div class="card-body">
+          <h2>Candidate Selection</h2>
+
+          <p align="justify">
+            Recall the pseudocode for computing the candidate solution:
+          </p>
+
+          <div class="row bg-dark text-light">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+              <p>                
+                2. <b>Candidate Selection</b>: Use a black-box optimization algorithm to compute \(\theta_c\) that approximates a solution to:
+                $$
+                \theta_c \in \arg\max_{\theta \in \Theta} \hat f(\theta,D_1)\\
+                \text{s.t. } \forall i \in \{1,2,\dotsc,n\}, \quad \hat \mu(\hat g_i(\theta,D_1)) + 2\frac{\hat \sigma(\hat g(\theta,D_1))}{\sqrt{|D_2|}}t_{1-\delta_i,|D_2|-1} \leq 0
+                $$
+                <br>
+              </p>
+            </div>
+            <div class="col-md-2"></div>
+          </div>
+
+          <p align="justify">
+            We will use CMA-ES to search for the candidate solultion. However, CMA-ES is not a constrained algorithm. We will therefore incorporate the constraint into the objective function as a <a href="https://en.wikipedia.org/wiki/Barrier_function">barrier function</a>. That is, we will find an approximate solution to the unconstrained problem:
+          </p>
+          $$
+          \theta_c \in \arg \max_{\theta \in \mathbb R^2} 
+          \begin{cases}
+            \hat f(\theta,D_1) &\mbox{if } \forall i \in \{1,2,\dotsc,n\}, \,\, \operatorname{ub}_i \leq 0\\
+            -100,\!000 - \sum_{i=1}^n \operatorname{max}\left(0,\operatorname{ub}_i\right ) &\mbox{otherwise,}
+          \end{cases}
+          $$
+          where \(\operatorname{ub}_i\) is the conservative prediction of what the upper bound will be in the safety test for the \(i^\text{th}\) constraint:
+          $$
+          \operatorname{ub}_i=\hat \mu(\hat g_i(\theta,D_1) + 2\frac{\hat \sigma(\hat g(\theta,D_1))}{\sqrt{|D_2|}}t_{1-\delta_i,|D_2|-1}.
+          $$
+          <p align="justify">
+            Here \(-100,\!000\) is a constant small enough to ensure that \(\hat f\) will be larger for any solution that is predicted to pass the safety test, and we include the term \(\sum_{i=1}^n \max(0,\operatorname{ub}_i)\) to shape the barrier function to encourage CMA-ES to tend towards solutions that will pass the safety test.
+          </p>
+
+          <p align="justify">
+            To implement candidate selection in this way, we begin by writing the objective function that CMA-ES will attempt to maximize. Recall that CMA-ES is a black-box optimization algorithm. It does not know that our objective function depends on the data, the \(\hat g_i\) functions, the values of each \(\delta_i\), and the size of \(D_2\) (the size of the safety data set). So, these terms will be passed within the "params" argument. CMA-ES only knows that we are passing an array of pointers to constant objects. Here inside of our objective function, we will unpack this array of pointers to constant objects of unknown types into pointers to objects of the types we need. When we call CMA-ES later, we will need to pack these relevant objects into the params object in the same order/way that we are unpacking them here.
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <pre><span class="text-success">// The objective function maximized by getCandidateSolution.</span>
+<span class="text-primary">double</span> candidateObjective(
+  <span class="text-primary">const VectorXd</span>& theta,                <span class="text-success">// The solution to evaluate</span>
+  <span class="text-primary">const void</span> * params[],                <span class="text-success">// Other terms that we need to compute the objective value, packed into one object - an array of const pointers to objects of unknown types (unknown to CMA-ES, but known to us here as we packed this object)</span>
+  <span class="text-primary">mt19937_64</span>& generator)                <span class="text-success">// The random number generator to use</span>
+{
+  <span class="text-success">// Unpack the variables in params into their different types. See how they were packed in getCandidateSolution</span>
+  <span class="text-primary">const vector</span><<span class="text-primary">Point</span>>* p_Data = (<span class="text-primary">const vector</span><<span class="text-primary">Point</span>>*)params[0];            <span class="text-success">// The first pointer in params is a pointer to the data.</span>
+  <span class="text-primary">const vector</span><<span class="text-primary">VectorXd</span>(*)(<span class="text-primary">const VectorXd</span>&, <span class="text-primary">const vector</span><<span class="text-primary">Point</span>>&)>* p_gHats = (<span class="text-primary">const vector</span><<span class="text-primary">VectorXd</span>(*)(<span class="text-primary">const VectorXd</span>&, <span class="text-primary">const vector</span><<span class="text-primary">Point</span>>&)>*)params[1]; <span class="text-success">// The second pointer in params is a pointer to the std::vector of pointers to the gHat functions.</span>
+  <span class="text-primary">const vector</span><<span class="text-primary">double</span>>* p_deltas = (<span class="text-primary">const vector</span><<span class="text-primary">double</span>>*)params[2];        <span class="text-success">// The third pointer in params is a pointer to std::vector of delta_i values.</span>
+  <span class="text-primary">const unsigned int</span> safetyDataSize = *((<span class="text-primary">const unsigned int</span>*)params[3]);    <span class="text-success">// The fourth pointer in params is a pointer to the number of points in the safety data set.</span>
+
+  <span class="text-primary">double</span> result = fHat(theta, *p_Data); <span class="text-success">// Get the primary objective</span>
+  <span class="text-primary">bool</span> predictSafetyTest = true;        <span class="text-success">// Prediction of what the safety test will say - initialized to "true" = pass.</span>
+  <span class="text-danger">for</span> (<span class="text-primary">unsigned int</span> i = 0; i < p_gHats->size(); i++) {                      <span class="text-success">// Loop over the behavioral constraints</span>
+    <span class="text-primary">double</span> ub = ttestUpperBound((*p_gHats)[i](theta, *p_Data), (*p_deltas)[i], safetyDataSize); <span class="text-success">// Get the prediction of what the upper bound on g_i(theta) will be in the safety test.</span>
+    <span class="text-danger">if</span> (ub > 0) {                       <span class="text-success">// We don't think the i'th behavioral constraint will pass the safety test if we return theta as the candidate solution</span>
+      <span class="text-danger">if</span> (predictSafetyTest) {
+        predictSafetyTest = false;      <span class="text-success">// We don't think the safety test will pass</span>
+        result = -100000;               <span class="text-success">// Put a barrier in the objective - any solution that we think will pass all tests should have a value greater than what we return for this solution. Also, remove any shaping due to the primary objective so that we focus on the behavioral constraint.</span>
+      }
+      result -= ub;                     <span class="text-success">// Add a shaping to the objective function that will push the search toward solutions that will pass the prediction of the safety test.</span>
+    }
+  }
+  <span class="text-danger">return</span> result;
+}</pre>
+            </div>
+          </p>
+          <p align="justify">
+            In the above code, the computation of the variable <code>ub</code> can be scary looking. Let's look at this line in more detail. <code>p_gHats</code> is a pointer to an array of function pointers (our \(\hat g_i\) functions). The code <code>(*p_gHats)[i]</code> is getting the \(i^\text{th}\) function pointer&mdash;the pointer to the function gHat1 if <code>i=1</code> and gHat2 if <code>i=2</code>. This function pointer is then called on the inputs <code>theta, *p_Data</code>, i.e., we are computing \(\hat g_i(\theta,D_1)\), where <code>p_Data</code> is the pointer to \(D_1\), which we are dereferencing. The result of this call is a vector of unbiased estimates of \(g_i(\theta)\). This vector is then the first argument to the call to <code>ttestUpperBound</code>. The second argument is \(\delta_i\), and the third is \(|D_2|\).
+          </p>
+
+          <p align="justify">
+            Now that we have our candidate objective function, we can write <code>getCandidateSolution</code>, which uses CMA-ES to search for a solution that maximizes <code>candidateObjective</code>. Within <code>getCandidateSolution</code> we will have to pack the object <code>params</code> in a way that is consistent with how we unpack it in <code>candidateObjective</code>.
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <pre><span class="text-success">// Use the provided data to get a solution expected to pass the safety test</span>
+<span class="text-primary">VectorXd</span> getCandidateSolution(<span class="text-primary">const vector</span><<span class="text-primary">Point</span>> & Data, <span class="text-primary">const vector</span><<span class="text-primary">VectorXd</span>(*)(<span class="text-primary">const VectorXd</span>&, <span class="text-primary">const vector</span><<span class="text-primary">Point</span>>&)>& gHats, <span class="text-primary">const vector</span><<span class="text-primary">double</span>>& deltas, <span class="text-primary">const unsigned int</span>& safetyDataSize, <span class="text-primary">mt19937_64</span> & generator) {
+  <span class="text-primary">VectorXd</span> initialSolution = leastSquares(Data);    <span class="text-success">// Where should the search start? Let's just use the linear fit that we would get from ordinary least squares linear regression</span>
+  <span class="text-primary">double</span> initialSigma = 2.0*(initialSolution.dot(initialSolution) + 1.0); <span class="text-success">// A heuristic to select the width of the search based on the weight magnitudes we expect to see.</span>
+  <span class="text-primary">int</span> numIterations = 100;                          <span class="text-success">// Number of iterations that CMA-ES should run. Larger is better, but takes longer.</span>
+  <span class="text-primary">bool</span> minimize = false;                            <span class="text-success">// We want to maximize the candidate objective.</span>
+  <span class="text-success">// Pack parameters of candidate objective into params. In candidateObjective we need to unpack in the same order.</span>
+  <span class="text-primary">const void</span>* params[4];
+  params[0] = &Data;
+  params[1] = &gHats;
+  params[2] = &deltas;
+  params[3] = &safetyDataSize;
+  <span class="text-success">// Use CMA-ES to get a solution that approximately maximizes candidateObjective</span>
+  <span class="text-danger">return</span> CMAES(initialSolution, initialSigma, numIterations, candidateObjective, params, minimize, generator);
+}</pre>
+            </div>
+          </p>
+
+          <p align="justify">
+            That's it! If you compile and run the program, you should get the following console output: 
+            <kbd>A solution was found:  1.28802 0.737138</kbd>.
+            While an exciting result, it doesn't look very exciting. In the next tutorial we show how you can change the code in <code>int main(...)</code> to repeatedly run your <code>QSA</code> algorithm using different amounts of data and printing results to files that can be used to create plots like Fig. 3 in our paper.
+          </p>
+
+          <p align="justify">
+            The final main.cpp file with all of the code up until this point can be downloaded here:<br>
+            <a href="code/tutorial6/main.cpp" type="button" class="btn btn-success" >Download main.cpp</a>
+          </p>
+
+        </div>
+      </div>
+
+
+      
+
+
+      <div class="card-body">
+        <a href="tutorial5cpp.html" type="button" class="btn btn-outline-primary">Previous: Safety test</a>
+        <a href="tutorial7.html" type="button" class="btn btn-primary float-right">Next: Plotting</a>
+      </div>
+
+      <hr class="my-4">
+    </div>
+
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>

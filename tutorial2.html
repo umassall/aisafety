@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Mathjax -->
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <title>AI Safety &middot; Tutorial 2</title>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+      <a class="navbar-brand" href="index.html">AI Safety</a>
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="overview.html">Overview</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="paper.html">Paper</a>
+        </li>
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+            Tutorials
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="tutorial0.html">Tutorial Overview</a>
+            <a class="dropdown-item" href="tutorial1.html">1. Seldonian algorithm review</a>
+            <a class="dropdown-item disabled" href="tutorial2.html">2. Example problem</a>
+            <a class="dropdown-item" href="tutorial3.html">3. A simple Seldonian algorithm</a>
+            <hr>
+            <h6 class="dropdown-header text-primary"><b>C++</b></h6>
+            <a class="dropdown-item" href="tutorial4cpp.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item" href="tutorial5cpp.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item" href="tutorial6cpp.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <h6 class="dropdown-header text-success"><b>Python (COMING SOON)</b></h6>
+            <a class="dropdown-item disabled" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item disabled" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item disabled" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <hr>
+            <a class="dropdown-item" href="tutorial7.html">7. Plotting</a>
+            <a class="dropdown-item" href="tutorial8.html">8. Advanced Topics</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="code.html">Code</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="about.html">About Us</a>
+        </li>
+      </ul>
+      <!--<ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="donate.html">Donate</a>
+        </li>
+      </ul>-->
+    </nav>
+
+    <!-- Begin Content -->
+    <div class="container">
+      <div class="card bg-light mt-2">
+        <div class="card-body">
+          <h2>Simple Problem: Hello Seldonian Machine Learning!</h2>
+          <p align="justify">
+            We begin with a simple problem that can be solved using a Seldonian algorithm. This is the <a href="https://en.wikipedia.org/wiki/%22Hello,_World!%22_program">Hello World!</a> of Seldonian machine learning. When first solving this problem, we will hold off on providing a slick interface, and first focus on the core computational components of a Seldonian algorithm. 
+          </p>
+          <p align="justify">
+            This is a <em>regression</em> problem. Let \(X \in \mathbb R\) and \(Y \in \mathbb R\) be two dependent random variables. Our goal is to estimate \(Y\) given \(X\) and training data consisting of \(m\) independent and identically distributed samples, \(\{(X_i,Y_i)\}_{i=1}^m\). Although the Seldonian algorithm will not know the distributions of \(X\) and \(Y\), we will be writing the code to generate the training data samples, and so we must know how to generated samples of \(X\) and \(Y\):
+            $$
+            X \sim N(0,1)\quad\text{ and } \quad Y \sim N(X,1),
+            $$
+            where \(N(\mu,\sigma^2)\) denotes the normal distribution with mean \(\mu\) and variance \(\sigma^2\). 
+          </p>
+          <p align="justify">
+            The plot below shows 50,000 points sampled in this way (with transparency to better see the distribution):
+          </p>
+          <div class="container">
+            <div class="row">
+              <div class="col-md-4"></div>
+              <div class="col-md-4">
+                <img src="images/samples.png" class="img-fluid mx-auto d-block rounded shadow p-3 mb-5 bg-white" alt="Data samples">
+                <figcaption class="figure-caption">Matlab source code: [<a href="code/PlotDataDistribution.m">link</a>].</figcaption>
+              </div>
+              <div class="col-md-4"></div>
+            </div>
+          </div>
+          <p align="justify">
+            Let \(\Theta = \mathbb R^n\) and let the estimate of \(Y\) given \(X\) and \(\theta\) be \(\hat y(X,\theta)=\theta_1 X + \theta_2\). The <em>mean squared error</em> (MSE) of a solution \(\theta\) is 
+            $$
+            \operatorname{MSE}(\theta)=\mathbf E\left [ (\hat y(X,\theta)-Y)^2\right ].
+            $$
+            Our goal is to find an algorithm that minimizes the mean squared error, and so our sample objective is the negative sample mean squared error:
+            $$
+            \hat f(\theta,D)=-\frac{1}{n}\sum_{i=1}^n (\hat y(X_i,\theta)-Y_i)^2. 
+            $$
+            We use the <em>negative</em> sample MSE because our algorithm will attempt to maximize \(f\), while we want to minimize MSE.
+          </p>
+
+          <p align="justify">
+            We consider the problem of creating a linear regression algorithm that ensures that, with probability at least 0.9, the mean squared error of its predictions is below 2.0, and also with probability at least 0.9, the mean squared error if its predictions is above 1.25. That is \(n=2\) (there are two behavioral constraints) and:
+            <ul>
+              <li>\(g_1(\theta)=\operatorname{MSE}(\theta)-2.0\) and \(\delta_1=0.1\).</li>
+              <li>\(g_2(\theta)=1.25 - \operatorname{MSE}(\theta)\) and \(\delta_1=0.1\).</li>
+            </ul>
+          </p>
+
+          <p align="justify">
+            For now we will consider an interface that is not particularly easy to use, as it requires the user to write code to define undesirable behavior: we assume that the user provides a function \(\hat g_i\) for each behavioral constraint such that \(\hat g_i(\theta,D)\) is a vector of independent and identically distributed unbiased estimates of \(g(\theta)\). That is, if \(g_{i,j}(\theta,D)\) is the \(j^\text{th}\) output of \(\hat g_i(\theta,D)\), then for every \(i\) and \(j\):
+            $$
+            g_i(\theta)=\mathbf E[\hat g_{i,j}(\theta,D)].
+            $$
+            In our case, 
+            $$
+            \hat g_{1,j}(\theta,D) = (\hat y(X_j,\theta)-Y_j)^2-2.0,
+            $$
+            and
+            $$
+            \hat g_{2,j}(\theta,D) = 1.25-(\hat y(X_j,\theta)-Y_j)^2.
+            $$
+          </p>
+
+          <p align="justify">
+            This synthetic example was constructed to be simple, and yet also to test the ability of a Seldonian algorithm to handle behavioral constraints that are in conflict with the objective function (the solution that minimizes the MSE will violate the second behavioral constraint). Once we have created a quasi-Seldonian algorithm for this problem, extending our algorithm to include a simple interface and to the general regression and classification settings is relatively simple and discussed in a later tutorial.
+          </p>
+
+          <p align="justify">
+            In summary, we will creating a linear regression algorithm that guarantees with probabiliy \(0.9\) the MSE of its predictions is below \(2.0\) and with probability \(0.9\) the MSE of its predictions is above \(1.25\). By <a href="https://en.wikipedia.org/wiki/Boole%27s_inequality">Boole's inequality</a>, this implies that with probability \(0.8\) the MSE of its predictions is in the interval \([1.25,2.0]\). We will test our algorithm on a simple data set where the inputs come from a standard normal distribution and the outputs are equal to the inputs, plus noise with a standard normal distribution.
+          </p>
+
+        </div>
+      </div>
+
+      <div class="card-body">
+        <a href="tutorial1.html" type="button" class="btn btn-outline-primary">Previous: Seldonian algorithm review</a>
+        <a href="tutorial3.html" type="button" class="btn btn-primary float-right">Next: A simple Seldonian algorithm</a>
+      </div>
+
+      <hr class="my-4">
+    </div>
+
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>

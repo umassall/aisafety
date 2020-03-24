@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Mathjax -->
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <title>AI Safety &middot; Tutorial 1</title>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+      <a class="navbar-brand" href="index.html">AI Safety</a>
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="overview.html">Overview</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="paper.html">Paper</a>
+        </li>
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+            Tutorials
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="tutorial0.html">Tutorial Overview</a>
+            <a class="dropdown-item disabled" href="tutorial1.html">1. Seldonian algorithm review</a>
+            <a class="dropdown-item" href="tutorial2.html">2. Example problem</a>
+            <a class="dropdown-item" href="tutorial3.html">3. A simple Seldonian algorithm</a>
+            <hr>
+            <h6 class="dropdown-header text-primary"><b>C++</b></h6>
+            <a class="dropdown-item" href="tutorial4cpp.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item" href="tutorial5cpp.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item" href="tutorial6cpp.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <h6 class="dropdown-header text-success"><b>Python (COMING SOON)</b></h6>
+            <a class="dropdown-item disabled" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item disabled" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item disabled" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <hr>
+            <a class="dropdown-item" href="tutorial7.html">7. Plotting</a>
+            <a class="dropdown-item" href="tutorial8.html">8. Advanced Topics</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="code.html">Code</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="about.html">About Us</a>
+        </li>
+      </ul>
+      <!--<ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="donate.html">Donate</a>
+        </li>
+      </ul>-->
+    </nav>
+
+    <!-- Begin Content -->
+    <div class="container">
+      <div class="card bg-light mt-2">
+        <div class="card-body">
+          <h2>Disclaimer</h2>
+           <p align="justify">
+            We recommend that you read Section 3 of the supplementary materials of our paper<sup>[<a href="https://science.sciencemag.org/lookup/doi/10.1126/science.aag3311">link</a>]</sup> for the formal definition of our framework and Seldonian algorithms. Here we provide an extremely brief recap. Although this page summarizes our framework and Seldonian algorithms, it does not walk through <em>why</em> the framework is the way it is, or how it compares to the previous standard approach for designing machine learning algorithms&mdash;that is the purpose of the paper.
+          </p>
+        </div>
+      </div>
+      <div class="card bg-light mt-2">
+        <div class="card-body">
+          <h2>Seldonian Algorithms: Formal Definition</h2>
+          <p align="justify">
+            Notation:
+            <ul>
+              <li>\(\mathcal D\) is the set of all possible inputs (data sets) to the algorithm.</li>
+              <li> \(\Theta\) is the set of all possible outputs of the algorithm, each of which we refer to as a <em>solution</em> \(\theta \in \Theta\).
+              <li>\(D\) is the data set input to the algorithm, which we view as a <a href="https://en.wikipedia.org/wiki/Random_variable">random variable</a>.</li>
+              <li>\(a:\mathcal D \to \Theta\) is a machine learning algorithm, which takes a data set as input and returns a solution. That is, \(a(D)\) is the solution (an element of \(\Theta\)) output by the algorithm when run on input \(D\). Any random numbers required by the algorithm should be included in \(D\).</li>
+              <li>\(\mathcal A\) is the set of all possible machine learning algorithms.</li>
+              <li>\(f:\mathcal A \to \mathbb R\) is the <em>objective function</em> of the algorithm designer. That is, the algorithm designer's goal is to find an algorithm that maximizes \(f\), subject to the behavioral constraints.</li>
+              <li>\(n\) is the number of <em>behavioral constraints</em>.</li>
+              <li>\((g_i,\delta_i)_{i=1}^n\) is the set of \(n\) behavioral constraints, each of which contains a <em>constraint function</em> \(g_i:\Theta\to\mathbb R\) and a <em>confidence level</em> \(\delta_i\).</li>
+                <ul>
+                  <li>The constraint function measures undesirable behavior: we say that \(\theta \in \Theta\) produces undesirable behavior if and only if \(g_i(\theta) > 0\).</li>
+                  <li>The confidence level specifies the maximum probability that the algorithm can return a solution \(\theta\) where \(g(\theta)>0\).</li>
+                </ul>
+              </li>
+            </ul>
+            A <em>Seldonian algorithm</em> ensures that for all \(i \in \{1,2,\dotsc,n\}\):
+            $$\Pr(g_i(a(D))\leq 0)\geq 1-\delta_i.$$
+            An algorithm is <em>quasi-Seldonian</em> if it relies on reasonable but false assumptions, such as appeals to the central limit theorem common in scientific research. As quasi-Seldonian algorithms tend to be more practical than Seldonian algorithms, we focus on creating a quasi-Seldonian algorithm here, but discuss how it could be transformed into a Seldonian algorithm.
+            <br><br>
+            Initially in this tutorial we begin by assuming that the following functions have been provided:
+            <ul>
+              <li>\(\hat f:\Theta \times \mathcal D \to \mathbb R\) is the <em>sample objective function</em>, such that \(\hat f(a(D),D')\) is an estimate of \(f(a)\) created from data sets \(D\) and \(D'\).</li>
+              <li>\(\hat g_i:\Theta \times \mathcal D \to \mathbb R\) is defined such that \(\hat g_i(\theta,D)\) is an unbiased estimator of \(g(\theta)\).</li>
+            </ul>
+            After we have created our first quasi-Seldonian algorithm in this setting, we describe more sophisticated interfaces that do not require \(\hat g_i\) to be provided by the user.
+          </p>
+        </div>
+      </div>
+
+      <div class="card bg-light mt-2">
+        <div class="card-body">
+          <h2>Seldonian Framework: Summary</h2>
+          <p align="justify">
+            Recall that our framework has three steps:
+          </p>
+          <ol>
+            <li>
+              <b>Define the goal for the algorithm design process.</b> In this step, the designer of the algorithm writes down an expression that captures their goals. This expression should have the form:
+              $$\arg\max_{a \in \mathcal A} f(a)\\\text{s.t. }\forall i \in \{1,\dotsc,n\},\quad\Pr(g_i(a(D))\leq 0)\geq 1-\delta_i.$$
+              This differs from the standard framework wherein we typically write down the goals of the algorithm. If this is not clear, notice that here the objective function and behavioral constraints are over algorithms, not solutions. <em>Algorithms</em> satisfy \(\Pr(g_i(a(D))\leq 0)\geq 1-\delta_i\), not <em>solutions</em>. This differs from the standard framework where we begin by writing the goal of the algorithm, which is to find a solution in
+              $$\arg\max_{\theta \in \Theta}f(\theta).$$
+              Here the constraint that \(\theta \in \Theta\) is a constraint that is satisfied by <em>solutions</em>. 
+            </li>
+            <br>
+            <li>
+              <b>Define the interface that the user will use.</b> In this step the designer of the algorithm specifies how future users of the algorithm will be able to specify each \(g_i\). This interface should be as easy to use as possible. For example, we should avoid requiring the user to provide code for \(g_i\) or the set of solutions such that \(g_i(\theta) \leq 0\), as the user typically will not know these quantities. Examples of interfaces include allowing users to provide unbiased estimators of each \(g_i\), allowing users to label outcomes as containing undesirable behavior or not, or allowing the user to write a mathematical expression for undesirable behavior in terms of a set of common variables, such as: <br><br><kbd>g(\theta)=abs(False_Positive_Male - False_Positive_Female) - 0.01</kbd>
+              <br><br>Later in these tutorials we will describe how each of these interfaces can function. We will begin with the first and most simple to implement: requiring the user to provide unbiased estimators, \(\hat g_i\).
+            </li>
+            <br>
+            <li>
+              <b>Create the algorithm.</b> In this step, the designer of the algorithm creates an algorithm that is an approximate solution to the optimization problem specified in the first step, while ensuring that the algorithm at least satisfies the behavioral constraints. This algorithm must also be compatible with the interface defined in the second step. 
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <a href="tutorial0.html" type="button" class="btn btn-outline-primary">Previous: Tutorial Overview</a>
+        <a href="tutorial2.html" type="button" class="btn btn-primary float-right">Next: Example problem</a>
+      </div>
+                
+      <hr class="my-4">
+    </div>
+
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>

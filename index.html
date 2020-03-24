@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Mathjax -->
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <title>AI Safety</title>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+      <a class="navbar-brand" href="#">AI Safety</a>
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="overview.html">Overview</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="paper.html">Paper</a>
+        </li>
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+            Tutorials
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="tutorial0.html">Tutorial Overview</a>
+            <a class="dropdown-item" href="tutorial1.html">1. Seldonian algorithm review</a>
+            <a class="dropdown-item" href="tutorial2.html">2. Example problem</a>
+            <a class="dropdown-item" href="tutorial3.html">3. A simple Seldonian algorithm</a>
+            <hr>
+            <h6 class="dropdown-header text-primary"><b>C++</b></h6>
+            <a class="dropdown-item" href="tutorial4cpp.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item" href="tutorial5cpp.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item" href="tutorial6cpp.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <h6 class="dropdown-header text-success"><b>Python (COMING SOON)</b></h6>
+            <a class="dropdown-item disabled" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item disabled" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item disabled" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <hr>
+            <a class="dropdown-item" href="tutorial7.html">7. Plotting</a>
+            <a class="dropdown-item" href="tutorial8.html">8. Advanced Topics</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="code.html">Code</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="about.html">About Us</a>
+        </li>
+      </ul>
+      <!--<ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="donate.html">Donate</a>
+        </li>
+      </ul>-->
+    </nav>
+
+    <!-- Jumbotron -->
+    <div class="container">
+      <div class="jumbotron">
+        <h1 class="display-4">AI Safety Research </h1>
+        <p class="lead">Ensuring that Current and Future Intelligent Machines are Well-Behaved</p>
+        <hr class="my-4">
+        <div class="embed-responsive embed-responsive-16by9">
+          <iframe class="embed-responsive-item" src="videos/Seldonian.mp4" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- News -->
+    <div class="container">
+      <div class="card bg-light mt-2">
+        <div class="card-body">
+          <h2>News</h2>
+          <ul>
+          	<li><b>January 2020</b>: According to Almetric, the Science paper is now in the top 0.1% of all publications tracked by Almetric, and ranked 24th of Science articles published in the last two years in terms of media coverage. Media coverage includes <a href="https://www.wired.com/story/researchers-guardrails-prevent-bias-ai/">Wired</a>, <a href="https://www.latimes.com/science/story/2019-11-23/fighting-bias-in-computer-algorithms">LA Times</a>, and <a href="https://espresso.economist.com/e33bff0ce02e89288c6ffe7cdd646389">The Economist</a>, as well as international coverage from <a href="https://www.agenciasinc.es/Noticias/Nuevos-algoritmos-vigilan-el-buen-comportamiento-de-la-inteligencia-artificial">Spain</a> (SINC), <a href="https://www.popmech.ru/technologies/news-526654-uchenye-razrabotali-pravilnuyu-platformu-dlya-ii/">Russia</a> (Popmech), and <a href="https://www.sohu.com/a/361651434_129720">China</a> (Sohu) among others. A partial list of coverage can be found <a href="https://www.altmetric.com/details/70944819/news">here</a>. 
+            <li><b>December 2019</b>: We presented a Seldonian contextual bandit algorithm at NeurIPS 2019. We applied our algorithm to predicting whether someone will commit a crime in the future, predicting whether someone will repay a loan, and optimizing an online tutoring system to maximize student performance, all while enforcing various fairness guarantees. [<a href="http://papers.nips.cc/paper/9630-offline-contextual-bandits-with-high-probability-fairness-guarantees.pdf">link</a>]</li>
+            <li><b>November 2019</b>: Our paper introducing Seldonian algorithms was published in <i>Science</i> [<a href="https://science.sciencemag.org/lookup/doi/10.1126/science.aag3311">link</a>]. [Press releases <a href="https://news.stanford.edu/press/view/31224">1</a>, <a href="https://www.umass.edu/newsoffice/article/new-machine-learning-algorithms-offer">2</a>]</li>
+          </ul>
+        </div>
+      </div>
+
+      <hr class="my-4">
+    </div>
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>

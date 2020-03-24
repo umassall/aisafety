@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Mathjax -->
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <title>AI Safety &middot; Tutorial 4</title>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+      <a class="navbar-brand" href="index.html">AI Safety</a>
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="overview.html">Overview</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="paper.html">Paper</a>
+        </li>
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+            Tutorials
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="tutorial0.html">Tutorial Overview</a>
+            <a class="dropdown-item" href="tutorial1.html">1. Seldonian algorithm review</a>
+            <a class="dropdown-item" href="tutorial2.html">2. Example problem</a>
+            <a class="dropdown-item" href="tutorial3.html">3. A simple Seldonian algorithm</a>
+            <hr>
+            <h6 class="dropdown-header text-primary"><b>C++</b></h6>
+            <a class="dropdown-item disabled" href="tutorial4cpp.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item" href="tutorial5cpp.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item" href="tutorial6cpp.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <h6 class="dropdown-header text-success"><b>Python (COMING SOON)</b></h6>
+            <a class="dropdown-item disabled" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item disabled" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item disabled" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <hr>
+            <a class="dropdown-item" href="tutorial7.html">7. Plotting</a>
+            <a class="dropdown-item" href="tutorial8.html">8. Advanced Topics</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="code.html">Code</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="about.html">About Us</a>
+        </li>
+      </ul>
+      <!--<ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="donate.html">Donate</a>
+        </li>
+      </ul>-->
+    </nav>
+
+    <!-- Begin Content -->
+    <div class="container">
+      <div class="card bg-light mt-2">
+        <div class="card-body">
+          <h2>Coding Environment Setup</h2>
+          <p align="justify">
+            This version of the tutorial will use C++. <span class="text-danger"><b>We hope to provide a version of this tutorial using python in the near future.</b></span> Until then, this tutorial assumes that you are already familiar with C++ and have your own toolchain/IDE. We have tested the code in this tutorial using recent versions of gcc and MSVC. This tutorial uses the <a href="http://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen</a> library for linear algebra and uses <a href="https://www.boost.org/">Boost</a> to create a C++ version of Matlab's <a href="https://www.mathworks.com/help/stats/tinv.html">tinv</a> function. For instructions regarding installing Eigen, click <a href="EigenInstructions.html">here</a>. For instructions regarding installing Boost, click <a href="BoostInstructions.html">here</a>.
+          </p>
+          <p align="justify">
+            Create a new C++ project, and place <a href="code/tutorial4/HelperFunctions.hpp">HelperFunctions.hpp</a> in the include directory. This file contains some simple functions that are not specific to Seldonian algorithms, but which will be useful to us:
+          </p>
+          <table class="table table-hover table-dark">
+            <thead>
+              <tr>
+                <th scope="col">Function Name</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">tinv</th>
+                <td><code>double tinv(double p, unsigned int nu)</code> returns the 100(1-<code>p</code>) percentile of the Student t distribution with <code>nu</code> degrees of freedom. This is a C++ implementation of Matlab's <a href="https://www.mathworks.com/help/stats/tinv.html">tinv</a> function. This is the only function that uses Boost. If you have your own tinv implementation that does not use Boost, then you could use that here and avoid installing Boost.</td>
+              </tr>
+              <tr>
+                <th scope="row">stddev</th>
+                <td><code>double stddev(const VectorXd& v)</code> provides the sample standard deviation of the vector <code>v</code>, with Bessel's correction: \(\operatorname{stddev}(v)\sqrt{\frac{1}{|v|-1} \sum_{i=1}^{|v|}(v_i-\operatorname{mean}(v))^2}\), where \(\operatorname{mean}(v)=\frac{1}{|v|}\sum_{i=1}^{|v|} v_i\) is the sample mean of <code>v</code>.</td>
+              </tr>
+              <tr>
+                <th scope="row">ttestUpperBound</th>
+                <td><code>double ttestUpperBound(const VectorXd& v, const double& delta, const int numPoints = -1)</code> returns a (1-<code>delta</code>)-confidence upper bound on the mean of the distribution that generated the independent and identically distributed values in the vector <code>v</code>, assuming that \(\operatorname{mean}(v)\) is normally distributed. If <code>numPoints</code> is provided as an argument, then this function <em>predicts</em> what its output would be if it were called with a new vector <code>v</code> that contains <code>numPoints</code> samples from the same distribution that generated <code>v</code>. This functionality will be useful when the candidate selection mechanism is predicting what the future output of the safety test will be.</td>
+              </tr>
+              <tr>
+                <th scope="row">CMAES</th>
+                <td><code>VectorXd CMAES(...)</code> is an implementation of the black-box optimization algorithm <a href="https://en.wikipedia.org/wiki/CMA-ES">CMA-ES</a>. Its inputs are:
+                  <ol>
+                    <li><code>initialMean</code>: The starting point for the search.</li>
+                    <li><code>initialSigma</code>: The initial standard deviation for sampling solutions around initialMean. This should generally be set slightly larger than the width of the region you hope to search.</li>
+                    <li><code>numIterations</code>: The number of iterations of CMA-ES to run. Larger values often result in better solutions, but requires more computation time.</li>
+                    <li><code>f</code>: The function to be minimized or maximized. This function should have inputs <code>theta</code>, <code>params</code>, and <code>generator</code>. Here <code>theta</code> is the point to be evaluated, <code>params</code> should contain any objects that the objective function requires (such as data), and <code>generator</code> should be the random number generator to use.</li>
+                    <li><code>params</code>: This object will be passed through CMA-ES to all of the calls to <code>f</code>.</li>
+                    <li><code>minimize</code>: If true, CMA-ES attempts to minimize <code>f</code>. If false, CMA-ES attempts to maximize f.</li>
+                    <li><code>generator</code>: The random number generator to use.</li>
+                  </ol>
+                  This implementation of CMA-ES is quite basic. It does not include restarts and is not a state-of-the-art variant like <a href="https://hal.inria.fr/hal-00737409/document">BIPOP-aCMA-ES</a>.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p align="justify">
+            Create main.cpp and copy in the following code:
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <pre><span class="text-success">// Standard includes that should come with your compiler</span>
+<span class="text-primary">#include</span> &lt;iostream&gt;     <span class="text-success">// For console i/o</span>
+<span class="text-primary">#include</span> &lt;vector&gt;       <span class="text-success">// For vectors, not including linear algebra</span>
+<span class="text-primary">#include</span> &lt;random&gt;       <span class="text-success">// For random number generation</span>
+
+<span class="text-success">// Additional library that you should have downloaded.</span>
+<span class="text-primary">#include</span> &lt;Eigen/Dense&gt;
+
+<span class="text-primary">#include</span> "HelperFunctions.hpp"            <span class="text-success">// General functions not specific to our Seldonian algorithm implementation</span>
+
+<span class="text-primary">using namespace</span> std;                      <span class="text-success">// To avoid writing std::vector all the time</span>
+<span class="text-primary">using namespace</span> Eigen;                    <span class="text-success">// To avoid writing Eigen::VectorXd all the time</span>
+
+<span class="text-success">// We will place code for the Seldonian algorithm here.</span>
+
+<span class="text-success">// Entry point for the program</span>
+<span class="text-primary">int</span> main(<span class="text-primary">int</span> argc, <span class="text-primary">char</span>* argv[]) {
+  <span class="text-primary">mt19937_64</span> generator(0);                <span class="text-success">// Create the random number generator to use, with seed zero</span>
+  <span class="text-primary">unsigned int</span> numPoints = 5000;          <span class="text-success">// Let's use 5000 points</span>
+  <span class="text-primary">vector</span><<span class="text-primary">Point</span>> Data = generateData(numPoints, generator);              <span class="text-success">// Generate the data</span>
+
+  <span class="text-success">// Create the behavioral constraints - each is a gHat function and a confidence level delta. Put these in vector objects, one element per constraint</span>
+  <span class="text-primary">vector</span>&lt;<span class="text-primary">VectorXd</span>(*)(<span class="text-primary">const VectorXd</span>&, <span class="text-primary">const vector</span>&lt;<span class="text-primary">Point</span>&gt;&)&gt; gHats(2);  <span class="text-success">// The array of gHat functions to use</span>
+  gHats[0] = gHat1;                       <span class="text-success">// This gHat requires the MSE to be less than 2.0</span>
+  gHats[1] = gHat2;                       <span class="text-success">// This gHat requires the MSE to be at least 1.25</span>
+  <span class="text-primary">vector</span>&lt;<span class="text-primary">double</span>&gt; deltas(2, 0.1);          <span class="text-success">// The array of confidence levels, delta, to use. Initialize with two values, both equal to 0.1.</span>
+  
+  <span class="text-primary">pair</span>&lt;<span class="text-primary">VectorXd</span>, <span class="text-primary">bool</span>&gt; result = QSA(Data, gHats, deltas, generator);    <span class="text-success">// Run the Seldonian algorithm.</span>
+  <span class="text-danger">if</span> (result.second) cout << "A solution was found: " << result.first.transpose() << endl;
+  <span class="text-danger">else</span> cout << "No solution found." << endl;
+}</pre>
+            </div>
+          </p>
+
+          <p align="justify">
+            The code above includes the Eigen library and HelperFunctions.hpp (which in turn includes Boost). The function <code>main(...)</code> is set up to run a simple experiment. Read through the function main, which relies on some things that we will need to write. <code>Point</code> will be an object that holds one data point, <code>generateData</code> will be a function that generates a data set for us to run the algorithm on, <code>gHat1</code> will be \(\hat g_1\), <code>gHat2</code> will be \(\hat g_2\), and <code>QSA</code> will be our quasi-Seldonian algorithm. The pair of objects returned by <code>QSA</code> is the solution (first element) and a Boolean flag indicating whether a solution was found (second element). The first element is only guaranteed to be set if the second element is true (if a solution was found).
+          </p>
+        </div>
+      </div>
+
+      <div class="card bg-light mt-2">
+        <div class="card-body">
+          <h2>Problem Implementation</h2>
+          <p align="justify">
+            We now implement the problem that we defined earlier in the tutorial [<a href="tutorial2.html">go back</a>]. The following functions should all be placed above the function <code>int main(...)</code>. First, we define a <code>Point</code> object that will contain a single data point:
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <pre><span class="text-success">// We will store individual data points in this object</span>
+<span class="text-primary">struct</span> Point {
+  <span class="text-primary">double</span> x;                 <span class="text-success">// Input value</span>
+  <span class="text-primary">double</span> y;                 <span class="text-success">// Output value</span>
+};</pre>
+            </div>
+          </p>
+
+          <p align="justify">
+            Next, we write the <code>generateData</code> function, which samples data as described in the problem description:
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <pre><span class="text-success">// Generate numPoints data points. Here generator is the random number generator to use</span>
+<span class="text-primary">vector</span><<span class="text-primary">Point</span>> generateData(<span class="text-primary">int</span> numPoints, <span class="text-primary">mt19937_64</span> & generator)
+{
+  <span class="text-primary">vector</span><<span class="text-primary">Point</span>> result(numPoints);          <span class="text-success">// Create the vector of data points that we will return, of length numPoints</span>
+  <span class="text-primary">normal_distribution</span><<span class="text-primary">double</span>> d(0, 1);      <span class="text-success">// Create a standard normal distribution (mean 0, variance 1)</span>
+  <span class="text-danger">for</span> (<span class="text-primary">Point</span>& p : result) {                 <span class="text-success">// Loop over each point p in result</span>
+    p.x = d(generator);                     <span class="text-success">// Sample x from a standard normal distribution</span>
+    p.y = p.x + d(generator);               <span class="text-success">// Set y to be x, plus noise from a standard normal distribution</span>
+  }
+  <span class="text-danger">return</span> result;
+}</pre>
+            </div>
+          </p>
+
+
+
+          <p align="justify">
+            Next, we write the function that takes in a solution \(\theta\) and an input \(X\), and produces as output the prediction of \(Y\), i.e., this function implements \(\hat y(X,\theta)\):
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <pre><span class="text-success">// Using the weights in theta, predict the y-value associated with the provided x.</span>
+<span class="text-success">// This function assumes we are performing linear regression, so that theta has</span>
+<span class="text-success">// two elements, the slope (first parameter) and y-intercept (second parameter)</span>
+<span class="text-primary">double</span> predict(<span class="text-primary">const VectorXd</span> & theta, <span class="text-primary">const double</span> & x) {
+  <span class="text-danger">return</span> theta[0] * x + theta[1];
+}</pre>
+            </div>
+          </p>
+
+          <p align="justify">
+            Next, we write the function \(\hat f\), which specifies the primary objective: minimize the sample mean squared error. Since we attempt to <em>maximize</em> \(\hat f\), we return the <em>negative</em> sample mean squared error, so that maximizing \(\hat f\) corresponds to minimizing the sample mean squared error:
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <pre><span class="text-success">// Estimator of the primary objective, in this case, the negative sample mean squared error</span>
+<span class="text-primary">double</span> fHat(<span class="text-primary">const VectorXd</span>& theta, <span class="text-primary">const vector</span><<span class="text-primary">Point</span>> & Data) {
+  <span class="text-primary">double</span> result = 0, prediction;       <span class="text-success">// We will store the sample MSE in result. Prediction will store the prediction for each point in the data set</span>
+  <span class="text-danger">for</span> (<span class="text-primary">const Point</span>& p : Data) {        <span class="text-success">// Loop over points p in the data set (Data)</span>
+    prediction = predict(theta, p.x);  <span class="text-success">// Get the prediction using theta</span>
+    result += (prediction - p.y) * (prediction - p.y);  <span class="text-success">// Add the squared error to result</span>
+  }
+  result /= (<span class="text-primary">double</span>)Data.size();       <span class="text-success">// We want the sample mean squared error, not the sum of squared errors, so divide by the number of samples</span>
+  <span class="text-danger">return</span> -result;                      <span class="text-success">// Return the value that we have computed</span>
+}</pre>
+            </div>
+          </p>
+
+          <p align="justify">
+            Next, we write the functions \(\hat g_1\) and \(\hat g_2\), which will be provided as input to the Seldonian algorithm. Recall from the <em>Simple Problem</em> tutorial that for every \(i\) and \(j\):
+            $$
+            \hat g_{1,j}(\theta,D) = (\hat y(X_j,\theta)-Y_j)^2-2.0,
+            $$
+            and
+            $$
+            \hat g_{2,j}(\theta,D) = 1.25-(\hat y(X_j,\theta)-Y_j)^2.
+            $$
+            Compare the above definitions to the code below.
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <pre><span class="text-success">// Returns unbiased estimates of g_1(theta), computed using the provided data</span>
+<span class="text-primary">VectorXd</span> gHat1(<span class="text-primary">const VectorXd</span>& theta, <span class="text-primary">const vector</span><<span class="text-primary">Point</span>>& Data) {
+  <span class="text-primary">VectorXd</span> result(Data.size());                     <span class="text-success">// We will get one estimate per data point, so initialize the result to have length equal to the number of data points</span>
+  <span class="text-danger">for</span> (<span class="text-primary">unsigned int</span> i = 0; i < Data.size(); i++) {  <span class="text-success">// Loop over the data points</span>
+    <span class="text-primary">double</span> prediction = predict(theta, Data[i].x);  <span class="text-success">// Compute the prediction for the i'th data point</span>
+    result[i] = (Data[i].y - prediction) * (Data[i].y - prediction);  <span class="text-success">// Compute the squared error for the i'th data point, and store in the i'th element of result.</span>
+  }
+  result.array() -= 2.0;                            <span class="text-success">// We want the MSE to be less than 2.0, so g(theta) = MSE-2.0.</span>
+  <span class="text-danger">return</span> result;                                    <span class="text-success">// Return the result that we have computed</span>
+}
+
+<span class="text-success">// Returns unbiased estimates of g_2(theta), computed using the provided data</span>
+<span class="text-primary">VectorXd</span> gHat2(<span class="text-primary">const VectorXd</span>& theta, <span class="text-primary">const vector</span><<span class="text-primary">Point</span>>& Data) {
+  <span class="text-primary">VectorXd</span> result(Data.size());                     <span class="text-success">// We will get one estimate per data point, so initialize the result to have length equal to the number of data points</span>
+  <span class="text-danger">for</span> (<span class="text-primary">unsigned int</span> i = 0; i < Data.size(); i++) {  <span class="text-success">// Loop over the data points</span>
+    <span class="text-primary">double</span> prediction = predict(theta, Data[i].x);  <span class="text-success">// Compute the prediction for the i'th data point</span>
+    result[i] = (Data[i].y - prediction) * (Data[i].y - prediction);  <span class="text-success">// Compute the squared error for the i'th data point, and store in the i'th element of result.</span>
+  }
+  result.array() = 1.25 - result.array();            <span class="text-success">// We want the MSE to be at least 1.25, so g(theta) = 1.25-MSE.</span>
+  <span class="text-danger">return</span> result;                                    <span class="text-success">// Return the result that we have computed</span>
+}</pre>
+            </div>
+          </p>
+
+
+          <p align="justify">
+            Finally, later we will want the ordinary least-squares solution to use as a starting point during the search for a candidate solution. This code implements least squares linear regression:
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <pre><span class="text-success">// Run ordinary least squares linear regression</span>
+<span class="text-primary">VectorXd</span> leastSquares(<span class="text-primary">const vector</span><<span class="text-primary">Point</span>> & Data) {
+  <span class="text-success">// Put data into an input matrix X (Data.size() rows, 2 cols), and vector y (of Data.size()).</span>
+  <span class="text-primary">MatrixXd</span> X = <span class="text-primary">MatrixXd</span>::Ones(Data.size(), 2);                <span class="text-success">// Initialize X to be a matrix of Data.size() rows and 2 cols, filled with ones.</span>
+  <span class="text-primary">VectorXd</span> y(Data.size());                                    <span class="text-success">// Initialize y to be a vector of length Data.size()</span>
+  <span class="text-danger">for</span> (unsigned int i = 0; i < Data.size(); i++) {            <span class="text-success">// Loop over data points</span>
+    X(i, 0) = Data[i].x;                                      <span class="text-success">// Copy the x-value over the entry in the first colum of the i'th row.</span>
+    y[i] = Data[i].y;                                         <span class="text-success">// Copy the target value into the y-vector</span>
+  }
+  <span class="text-danger">return</span> X.jacobiSvd(ComputeThinU | ComputeThinV).solve(y);   <span class="text-success">// Return the least squares solution using Eigen's Jacobi SVD function.</span>
+}</pre>
+            </div>
+          </p>
+
+          <p align="justify">
+            We now have all of the libraries that we need and all of the functions to implement the problem that we specified earlier. Now we're ready to start writing our Seldonian algorithm! From here it's easy&mdash;by line-count, you've already written most of the code.
+          </p>
+          
+
+        </div>
+      </div>
+
+
+      
+
+
+      <div class="card-body">
+        <a href="tutorial3.html" type="button" class="btn btn-outline-primary">Previous: A simple Seldonian algorithm</a>
+        <a href="tutorial5cpp.html" type="button" class="btn btn-primary float-right">Next: Safety test</a>
+      </div>
+
+      <hr class="my-4">
+    </div>
+
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>

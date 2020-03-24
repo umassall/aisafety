@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Mathjax -->
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <title>AI Safety &middot; Tutorial 5</title>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+      <a class="navbar-brand" href="index.html">AI Safety</a>
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="overview.html">Overview</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="paper.html">Paper</a>
+        </li>
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+            Tutorials
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="tutorial0.html">Tutorial Overview</a>
+            <a class="dropdown-item" href="tutorial1.html">1. Seldonian algorithm review</a>
+            <a class="dropdown-item" href="tutorial2.html">2. Example problem</a>
+            <a class="dropdown-item" href="tutorial3.html">3. A simple Seldonian algorithm</a>
+            <hr>
+            <h6 class="dropdown-header text-primary"><b>C++</b></h6>
+            <a class="dropdown-item" href="tutorial4cpp.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item disabled" href="tutorial5cpp.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item" href="tutorial6cpp.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <h6 class="dropdown-header text-success"><b>Python (COMING SOON)</b></h6>
+            <a class="dropdown-item disabled" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item disabled" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item disabled" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <hr>
+            <a class="dropdown-item" href="tutorial7.html">7. Plotting</a>
+            <a class="dropdown-item" href="tutorial8.html">8. Advanced Topics</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="code.html">Code</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="about.html">About Us</a>
+        </li>
+      </ul>
+      <!--<ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="donate.html">Donate</a>
+        </li>
+      </ul>-->
+    </nav>
+
+    <!-- Begin Content -->
+    <div class="container">
+      <div class="card bg-light mt-2">
+        <div class="card-body">
+          <h2>Safety Test</h2>
+          <p align="justify">
+            Before we implement the safety test, let's write a shell for our quasi-Seldonian algorithm, which we will call <code>QSA</code>. This shell will show how the safety test will be called. At a high level, we are simply partitioning the data, getting a candidate solution, and running the safet test. If you are relatively new to C++, the third argument may appear to be confusing: this argument is an <code>std::vector</code> of pointers to functions, each of which has inputs and outputs matching the functions <code>hatG1</code> and <code>hatG2</code> that we wrote earlier. Also, we are using the more descriptive names <code>candData</code> (candidate data) for \(D_1\) and <code>safetyData</code> for \(D_2\). Lastly, notice that we are placing 40% of the data in <code>candData</code> and 60% in <code>safetyData</code>&mdash;this is an arbitrary choice and it remains an open question how best to optimize this partitioning of the data.
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <pre><span class="text-success">// Our quasi-Seldonian linear regression algorithm. The result is a pair of items, the second</span>
+<span class="text-success">// is a Boolean denoting whether a solution is being returned. If it is false, it indicates</span>
+<span class="text-success">// No Solution Found (NSF), and the first element is irrelevant. If the second element is</span>
+<span class="text-success">// true, then the first element is the solution that was found.</span>
+<span class="text-primary">pair</span>&lt;<span class="text-primary">VectorXd</span>,<span class="text-primary">bool</span>&gt; QSA(
+  <span class="text-primary">const vector</span>&lt;<span class="text-primary">Point</span>&gt;& Data,              <span class="text-success">// The training data to use</span>
+  <span class="text-primary">const vector</span>&lt;<span class="text-primary">VectorXd</span>(*)(<span class="text-primary">const VectorXd</span>&, <span class="text-primary">const vector</span>&lt;<span class="text-primary">Point</span>&gt;&)&gt;& gHats,       <span class="text-success">// Unbiased estimators of g(theta) for each of the behavioral constraints</span>
+  <span class="text-primary">const vector</span>&lt;<span class="text-primary">double</span>&gt;& deltas,           <span class="text-success">// Confidence levels for the behavioral constraints</span>
+  <span class="text-primary">mt19937_64</span>& generator)                  <span class="text-success">// The random number generator to use</span>
+{
+  <span class="text-primary">vector</span>&lt;<span class="text-primary">Point</span>&gt; candData(Data.begin(), Data.begin() + (int)(Data.size() * 0.4)); <span class="text-success">// Put 40% of the data in candidateData</span>
+  <span class="text-primary">vector</span><<span class="text-primary">Point</span>> safetyData(Data.begin() + candData.size(), Data.end());          <span class="text-success">// Put the rest of the data in safetyData</span>
+  <span class="text-primary">pair</span><<span class="text-primary">VectorXd</span>, <span class="text-primary">bool</span>> result;            <span class="text-success">// Create the object that we will return</span>
+  result.first = getCandidateSolution(candData, gHats, deltas, (unsigned int)safetyData.size(), generator); <span class="text-success">// Get the candidate solution</span>
+  result.second = safetyTest(result.first, safetyData, gHats, deltas);           <span class="text-success">// Run the safety test</span>
+  <span class="text-danger">return</span> result;                          <span class="text-success">// Return the result object</span>
+}</pre>
+            </div>
+          </p>
+
+          <p align="justify">
+            Recall the pseudocode for the safety test:
+          </p>
+          <div class="row bg-dark text-light">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+              <p>                
+                3. <b>Safety Test</b>: Return \(\theta_c\) if
+                $$
+                \forall i \in \{1,2,\dotsc,n\}, \quad \hat \mu(\hat g_i(\theta_c,D_2)) + \frac{\hat \sigma(\hat g(\theta_c,D_2))}{\sqrt{|D_2|}}t_{1-\delta_i,|D_2|-1} \leq 0,
+                $$
+                and No Solution Found (NSF) otherwise.
+              </p>
+            </div>
+            <div class="col-md-2"></div>
+          </div>
+
+          <p align="justify">
+            Given the helper functions we already have, this function is straightforward to write:
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <pre><span class="text-success">// Run the safety test on the solution theta. Returns true if the test is passed</span>
+<span class="text-primary">bool</span> safetyTest(
+  <span class="text-primary">const VectorXd</span>& theta,                              <span class="text-success">// The solution to test</span>
+  <span class="text-primary">const vector</span><<span class="text-primary">Point</span>>& Data,                          <span class="text-success">// The data to use in the safety test</span>
+  <span class="text-primary">const vector</span><<span class="text-primary">VectorXd</span>(*)(<span class="text-primary">const VectorXd</span>&, <span class="text-primary">const vector</span><<span class="text-primary">Point</span>>&)>& gHats,  <span class="text-success">// Unbiased estimators of g(theta) for each of the behavioral constraints</span>
+  <span class="text-primary">const vector</span><<span class="text-primary">double</span>>& deltas)                       <span class="text-success">// Confidence levels for the behavioral constraints </span>
+{
+  <span class="text-danger">for</span> (<span class="text-primary">unsigned int</span> i = 0; i < gHats.size(); i++) {   <span class="text-success">// Loop over behavioral constraints, checking each</span>
+    <span class="text-danger">if</span> (ttestUpperBound(gHats[i](theta, Data), deltas[i]) > 0)              <span class="text-success">// Check if the i'th behavioral constraint is satisfied</span>
+      <span class="text-danger">return</span> false;                                   <span class="text-success">// It wasn't - the safety test failed.</span>
+  }
+  <span class="text-danger">return</span> true;                                        <span class="text-success">// If we get here, all of the behavioral constraints were satisfied</span>
+}</pre>
+            </div>
+          </p>
+
+          <p align="justify">
+            We're almost there. All that's left is the the function getCandidateSolution!
+          </p>
+
+
+        </div>
+      </div>
+
+
+      
+
+
+      <div class="card-body">
+        <a href="tutorial4cpp.html" type="button" class="btn btn-outline-primary">Previous: Coding environment setup</a>
+        <a href="tutorial6cpp.html" type="button" class="btn btn-primary float-right">Next: Candidate selection</a>
+      </div>
+
+      <hr class="my-4">
+    </div>
+
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>
