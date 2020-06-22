@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Mathjax -->
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <title>AI Safety &middot; Tutorial 4</title>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+      <a class="navbar-brand" href="index.html">AI Safety</a>
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="overview.html">Overview</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="paper.html">Paper</a>
+        </li>
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+            Tutorials
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="tutorial0.html">Tutorial Overview</a>
+            <a class="dropdown-item" href="tutorial1.html">1. Seldonian algorithm review</a>
+            <a class="dropdown-item" href="tutorial2.html">2. Example problem</a>
+            <a class="dropdown-item" href="tutorial3.html">3. A simple Seldonian algorithm</a>
+            <hr>
+            <h6 class="dropdown-header text-primary"><b>C++</b></h6>
+            <a class="dropdown-item" href="tutorial4cpp.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item" href="tutorial5cpp.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item" href="tutorial6cpp.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <a class="dropdown-item" href="tutorial7cpp.html">&nbsp;&nbsp;&nbsp;7. Plotting</a>
+            <h6 class="dropdown-header text-success"><b>Python</b></h6>
+            <a class="dropdown-item disabled" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <a class="dropdown-item" href="tutorial7py.html">&nbsp;&nbsp;&nbsp;7. Plotting</a>
+            <hr>
+            <a class="dropdown-item" href="tutorial8.html">8. Advanced Topics</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="code.html">Code</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="about.html">About Us</a>
+        </li>
+      </ul>
+      <!--<ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="donate.html">Donate</a>
+        </li>
+      </ul>-->
+    </nav>
+
+    <!-- Begin Content -->
+    <div class="container">
+      <div class="card bg-light mt-2">
+        <div class="card-body">
+          <h2>Coding Environment Setup</h2>
+          <p align="justify">
+            This version of the tutorial will use Python. This tutorial requires two Python libraries: <a href="https://scikit-learn.org/stable/">Scikit-Learn</a> and <a href="https://matplotlib.org/">Matplotlib</a>.
+          </p>
+          <p align="justify">
+            Start by creating a new Python project and by placing the <a href="helper.py">helper.py</a> file in the same folder. This file contains some simple functions that are not specific to Seldonian algorithms, but which will be useful to us:
+          </p>
+          <table class="table table-hover table-dark">
+            <thead>
+              <tr>
+                <th scope="col">Function Name</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">tinv</th>
+                <td><code>tinv(p, nu)</code> returns the 100(1-<code>p</code>) percentile of the Student's t-distribution with <code>nu</code> degrees of freedom.</td>
+              </tr>
+              <tr>
+                <th scope="row">stddev</th>
+                <td><code>stddev(v)</code> provides the sample standard deviation of the vector <code>v</code>, with Bessel's correction: \(\operatorname{stddev}(v) = \sqrt{\frac{1}{|v|-1} \sum_{i=1}^{|v|}(v_i-\operatorname{mean}(v))^2}\), where \(\operatorname{mean}(v)=\frac{1}{|v|}\sum_{i=1}^{|v|} v_i\) is the sample mean of <code>v</code>.</td>
+              </tr>
+              <tr>
+                <th scope="row">ttestUpperBound</th>
+                <td><code>ttestUpperBound(v, delta)</code> returns a <code>(1-delta)</code>-confidence upper bound on the mean of the distribution that generated the i.i.d. values in the vector <code>v</code>. It assumes that \(\operatorname{mean}(v)\) is normally distributed. It is used when checking whether each of the behavioral constraints passes the safety test.</td>
+              </tr>
+              <tr>
+                <th scope="row">predictTTestUpperBound</th>
+                <td><code>predictTTestUpperBound(v, delta, k)</code> works similarly to ttestUpperBound, but returns a more conservative upper bound. This is useful to make the Seldonian algorithm less confident that a given candidate solution is safe, thus making the generated candidate solutions more conservative. Such behavior helps when searching for candidate solutions that are likely to pass the safety test. This function uses data in the vector <code>v</code> to compute all relevant statistics (mean and standard deviation) but assumes that the number of points being analyzed is <code>k</code> instead of \(|v|\). 
+                  <!-- This functionality will be useful when the candidate selection mechanism is predicting what the future output of the safety test will be. -->
+                  <!-- This results in an estimate of the output of <code>ttestUpperBound</code> would return if it were to be run on a new vector, <code>v</code>, containing values sampled from the same distribution as the points in <code>v</code>.  -->
+              </td>
+              </tr>
+              
+            </tbody>
+          </table>
+
+          <p align="justify">
+            Now that you have access to these basic functions, create your main file, <code>main.py</code>, and copy in the following code:
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+
+              <!-- CODE --->
+              <!-- HTML generated using hilite.me -->
+              <!-- Style I used: fruity. CSS: padding:.2em .6em; -->
+<div style="background: #111111; overflow:auto;width:auto;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #fb660a; font-weight: bold">from</span> <span style="color: #ffffff">helper</span> <span style="color: #fb660a; font-weight: bold">import</span> <span style="color: #ffffff">*</span>
+
+<span style="color: #fb660a; font-weight: bold">if</span> <span style="color: #ffffff">__name__</span> <span style="color: #ffffff">==</span> <span style="color: #0086d2">&quot;__main__&quot;</span><span style="color: #ffffff">:</span>
+
+  <span style="color: #ffffff">np.random.seed(</span><span style="color: #0086f7; font-weight: bold">0</span><span style="color: #ffffff">)</span>  <span style="color: #008800; font-style: italic; background-color: #0f140f"># Create the random number generator to use, with seed zero</span>
+  <span style="color: #ffffff">numPoints</span> <span style="color: #ffffff">=</span> <span style="color: #0086f7; font-weight: bold">5000</span>   <span style="color: #008800; font-style: italic; background-color: #0f140f"># Let&#39;s use 5000 points</span>
+
+  <span style="color: #ffffff">(X,Y)</span>  <span style="color: #ffffff">=</span> <span style="color: #ffffff">generateData(numPoints)</span>  <span style="color: #008800; font-style: italic; background-color: #0f140f"># Generate the data</span>
+
+  <span style="color: #008800; font-style: italic; background-color: #0f140f"># Create the behavioral constraints - each is a gHat function and a confidence level delta</span>
+  <span style="color: #ffffff">gHats</span>  <span style="color: #ffffff">=</span> <span style="color: #ffffff">[gHat1,</span> <span style="color: #ffffff">gHat2]</span> <span style="color: #008800; font-style: italic; background-color: #0f140f"># The 1st gHat requires MSE &lt; 2.0. The 2nd gHat requires MSE &gt; 1.25</span>
+  <span style="color: #ffffff">deltas</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">[</span><span style="color: #0086f7; font-weight: bold">0.1</span><span style="color: #ffffff">,</span> <span style="color: #0086f7; font-weight: bold">0.1</span><span style="color: #ffffff">]</span>
+
+  <span style="color: #ffffff">(result,</span> <span style="color: #ffffff">found)</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">QSA(X,</span> <span style="color: #ffffff">Y,</span> <span style="color: #ffffff">gHats,</span> <span style="color: #ffffff">deltas)</span> <span style="color: #008800; font-style: italic; background-color: #0f140f"># Run the Quasi-Seldonian algorithm</span>
+  <span style="color: #fb660a; font-weight: bold">if</span> <span style="color: #ffffff">found:</span>
+    <span style="color: #ffffff">print(</span><span style="color: #0086d2">&quot;A solution was found: [%.10f, %.10f]&quot;</span> <span style="color: #ffffff">%</span> <span style="color: #ffffff">(result[</span><span style="color: #0086f7; font-weight: bold">0</span><span style="color: #ffffff">],</span> <span style="color: #ffffff">result[</span><span style="color: #0086f7; font-weight: bold">1</span><span style="color: #ffffff">]))</span>
+    <span style="color: #ffffff">print(</span><span style="color: #0086d2">&quot;fHat of solution (computed over all data, D):&quot;</span><span style="color: #ffffff">,</span> <span style="color: #ffffff">fHat(result,</span> <span style="color: #ffffff">X,</span> <span style="color: #ffffff">Y))</span>
+  <span style="color: #fb660a; font-weight: bold">else</span><span style="color: #ffffff">:</span>
+    <span style="color: #ffffff">print(</span><span style="color: #0086d2">&quot;No solution found&quot;</span><span style="color: #ffffff">)</span>
+</pre></div>
+            <!-- CODE --->
+            </div>
+
+          </p>
+
+          <p align="justify">
+            The function <code>main()</code>, above, is set up to run a simple experiment. Read through the function <code>main()</code> and notice that it relies on some things that we will need to write:
+            <ul>
+              <li><code>generateData</code> will be a function that generates a data set for us to run the algorithm on.</li>
+              <li><code>gHat1</code> will be \(\hat g_1\) and <code>gHat2</code> will be \(\hat g_2\).</li>
+              <li><code>QSA</code> will be our quasi-Seldonian algorithm. The pair of objects returned by <code>QSA</code> is the solution (first element) and a Boolean flag indicating whether a solution that satisfies all behavioral constraints was found (second element).</li>
+            </ul>
+          </p>
+        </div>
+      </div>
+
+      <div class="card bg-light mt-2">
+        <div class="card-body">
+          <h2>Problem Implementation</h2>
+          <p align="justify">
+            We now implement the regression problem that we defined <a href="tutorial2.html">earlier in the tutorial</a>. The following functions should all be placed at the beginning of the file <code>main.py</code>. 
+          </p>
+          <p align="justify">
+            First, let us write the <code>generateData</code> function, which samples data as described in the problem description:
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <!-- CODE --->
+              <!-- HTML generated using hilite.me -->
+              <!-- Style I used: fruity. CSS: padding:.2em .6em; -->
+<div style="background: #111111; overflow:auto;width:auto;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic; background-color: #0f140f"># Generate numPoints data points</span>
+<span style="color: #fb660a; font-weight: bold">def</span> <span style="color: #ff0086; font-weight: bold">generateData</span><span style="color: #ffffff">(numPoints):</span>
+  <span style="color: #ffffff">X</span> <span style="color: #ffffff">=</span>     <span style="color: #ffffff">np.random.normal(</span><span style="color: #0086f7; font-weight: bold">0.0</span><span style="color: #ffffff">,</span> <span style="color: #0086f7; font-weight: bold">1.0</span><span style="color: #ffffff">,</span> <span style="color: #ffffff">numPoints)</span> <span style="color: #008800; font-style: italic; background-color: #0f140f"># Sample x from a standard normal distribution</span>
+  <span style="color: #ffffff">Y</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">X</span> <span style="color: #ffffff">+</span> <span style="color: #ffffff">np.random.normal(</span><span style="color: #0086f7; font-weight: bold">0.0</span><span style="color: #ffffff">,</span> <span style="color: #0086f7; font-weight: bold">1.0</span><span style="color: #ffffff">,</span> <span style="color: #ffffff">numPoints)</span> <span style="color: #008800; font-style: italic; background-color: #0f140f"># Set y to be x, plus noise from a standard normal distribution</span>
+  <span style="color: #fb660a; font-weight: bold">return</span> <span style="color: #ffffff">(X,Y)</span>
+</pre></div>
+              <!-- CODE --->
+            </div>
+          </p>
+
+
+
+          <p align="justify">
+            Next, we write the function that takes in a solution \(\theta\) and an input \(X\), and produces as output the prediction of \(Y\). In other words, this function will implement \(\hat y(X,\theta)\):
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <!-- CODE --->
+              <!-- HTML generated using hilite.me -->
+              <!-- Style I used: fruity. CSS: padding:.2em .6em; -->
+<div style="background: #111111; overflow:auto;width:auto;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic; background-color: #0f140f"># Uses the weights in theta to predict the output value, y, associated with the provided x.</span>
+<span style="color: #008800; font-style: italic; background-color: #0f140f"># This function assumes we are performing linear regression, so that theta has</span>
+<span style="color: #008800; font-style: italic; background-color: #0f140f"># two elements: the y-intercept (first parameter) and slope (second parameter)</span>
+<span style="color: #fb660a; font-weight: bold">def</span> <span style="color: #ff0086; font-weight: bold">predict</span><span style="color: #ffffff">(theta,</span> <span style="color: #ffffff">x):</span>
+  <span style="color: #fb660a; font-weight: bold">return</span> <span style="color: #ffffff">theta[</span><span style="color: #0086f7; font-weight: bold">0</span><span style="color: #ffffff">]</span> <span style="color: #ffffff">+</span> <span style="color: #ffffff">theta[</span><span style="color: #0086f7; font-weight: bold">1</span><span style="color: #ffffff">]</span> <span style="color: #ffffff">*</span> <span style="color: #ffffff">x</span>
+</pre></div>
+
+              <!-- CODE --->
+
+            </div>
+          </p>
+
+          <p align="justify">
+            Next, we write the function \(\hat f\), which specifies our primary objective: to minimize the sample mean squared error. Since we are attempting to <em>maximize</em> \(\hat f\), however, we need to return the <em>negative</em> sample mean squared error, so that maximizing \(\hat f\) corresponds to minimizing the sample mean squared error:
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <!-- CODE --->
+              <!-- HTML generated using hilite.me -->
+              <!-- Style I used: fruity. CSS: padding:.2em .6em; -->
+<div style="background: #111111; overflow:auto;width:auto;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic; background-color: #0f140f"># Estimator of the primary objective, in this case, the negative sample mean squared error</span>
+<span style="color: #fb660a; font-weight: bold">def</span> <span style="color: #ff0086; font-weight: bold">fHat</span><span style="color: #ffffff">(theta,</span> <span style="color: #ffffff">X,</span> <span style="color: #ffffff">Y):</span>
+  <span style="color: #ffffff">n</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">X.size</span>          <span style="color: #008800; font-style: italic; background-color: #0f140f"># Number of points in the data set</span>
+  <span style="color: #ffffff">res</span> <span style="color: #ffffff">=</span> <span style="color: #0086f7; font-weight: bold">0.0</span>           <span style="color: #008800; font-style: italic; background-color: #0f140f"># Used to store the sample MSE we are computing</span>
+  <span style="color: #fb660a; font-weight: bold">for</span> <span style="color: #ffffff">i</span> <span style="color: #ffffff">in</span> <span style="color: #ffffff">range(n):</span>  <span style="color: #008800; font-style: italic; background-color: #0f140f"># For each point X[i] in the data set ...</span>
+    <span style="color: #ffffff">prediction</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">predict(theta,</span> <span style="color: #ffffff">X[i])</span>                <span style="color: #008800; font-style: italic; background-color: #0f140f"># Get the prediction using theta</span>
+    <span style="color: #ffffff">res</span> <span style="color: #ffffff">+=</span> <span style="color: #ffffff">(prediction</span> <span style="color: #ffffff">-</span> <span style="color: #ffffff">Y[i])</span> <span style="color: #ffffff">*</span> <span style="color: #ffffff">(prediction</span> <span style="color: #ffffff">-</span> <span style="color: #ffffff">Y[i])</span> <span style="color: #008800; font-style: italic; background-color: #0f140f"># Add the squared error to the result</span>
+  <span style="color: #ffffff">res</span> <span style="color: #ffffff">/=</span> <span style="color: #ffffff">n</span>            <span style="color: #008800; font-style: italic; background-color: #0f140f"># Divide by the number of points to obtain the sample mean squared error</span>
+  <span style="color: #fb660a; font-weight: bold">return</span> <span style="color: #ffffff">-res</span>         <span style="color: #008800; font-style: italic; background-color: #0f140f"># Returns the negative sample mean squared error</span>
+</pre></div>
+
+              <!-- CODE --->
+
+            </div>
+          </p>
+
+          <p align="justify">
+            Next, we write the functions \(\hat g_1\) and \(\hat g_2\) that will be provided as input to the Seldonian algorithm. Recall from the <em>Simple Problem</em> tutorial that for every \(i\) and \(j\):
+            $$
+            \hat g_{1,j}(\theta,D) = (\hat y(X_j,\theta)-Y_j)^2-2.0,
+            $$
+            and
+            $$
+            \hat g_{2,j}(\theta,D) = 1.25-(\hat y(X_j,\theta)-Y_j)^2.
+            $$
+            Compare the above definitions to the code below.
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <!-- CODE --->
+              <!-- HTML generated using hilite.me -->
+              <!-- Style I used: fruity. CSS: padding:.2em .6em; -->
+<div style="background: #111111; overflow:auto;width:auto;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic; background-color: #0f140f"># Returns unbiased estimates of g_1(theta), computed using the provided data</span>
+<span style="color: #fb660a; font-weight: bold">def</span> <span style="color: #ff0086; font-weight: bold">gHat1</span><span style="color: #ffffff">(theta,</span> <span style="color: #ffffff">X,</span> <span style="color: #ffffff">Y):</span>
+  <span style="color: #ffffff">n</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">X.size</span>          <span style="color: #008800; font-style: italic; background-color: #0f140f"># Number of points in the data set</span>
+  <span style="color: #ffffff">res</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">np.zeros(n)</span>   <span style="color: #008800; font-style: italic; background-color: #0f140f"># We will get one estimate per point; initialize res to store these estimates</span>
+  <span style="color: #fb660a; font-weight: bold">for</span> <span style="color: #ffffff">i</span> <span style="color: #ffffff">in</span> <span style="color: #ffffff">range(n):</span>
+    <span style="color: #ffffff">prediction</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">predict(theta,</span> <span style="color: #ffffff">X[i])</span>                   <span style="color: #008800; font-style: italic; background-color: #0f140f"># Compute the prediction for the i-th data point</span>
+    <span style="color: #ffffff">res[i]</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">(prediction</span> <span style="color: #ffffff">-</span> <span style="color: #ffffff">Y[i])</span> <span style="color: #ffffff">*</span> <span style="color: #ffffff">(prediction</span> <span style="color: #ffffff">-</span> <span style="color: #ffffff">Y[i])</span>  <span style="color: #008800; font-style: italic; background-color: #0f140f"># Compute the squared error for the i-th data point</span>
+  <span style="color: #ffffff">res</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">res</span> <span style="color: #ffffff">-</span> <span style="color: #0086f7; font-weight: bold">2.0</span>     <span style="color: #008800; font-style: italic; background-color: #0f140f"># We want the MSE to be less than 2.0, so g(theta) = MSE-2.0</span>
+  <span style="color: #fb660a; font-weight: bold">return</span> <span style="color: #ffffff">res</span>
+
+<span style="color: #008800; font-style: italic; background-color: #0f140f"># Returns unbiased estimates of g_2(theta), computed using the provided data</span>
+<span style="color: #fb660a; font-weight: bold">def</span> <span style="color: #ff0086; font-weight: bold">gHat2</span><span style="color: #ffffff">(theta,</span> <span style="color: #ffffff">X,</span> <span style="color: #ffffff">Y):</span>
+  <span style="color: #ffffff">n</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">X.size</span>          <span style="color: #008800; font-style: italic; background-color: #0f140f"># Number of points in the data set</span>
+  <span style="color: #ffffff">res</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">np.zeros(n)</span>   <span style="color: #008800; font-style: italic; background-color: #0f140f"># We will get one estimate per point; initialize res to store these estimates</span>
+  <span style="color: #fb660a; font-weight: bold">for</span> <span style="color: #ffffff">i</span> <span style="color: #ffffff">in</span> <span style="color: #ffffff">range(n):</span>
+    <span style="color: #ffffff">prediction</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">predict(theta,</span> <span style="color: #ffffff">X[i])</span>                   <span style="color: #008800; font-style: italic; background-color: #0f140f"># Compute the prediction for the i-th data point</span>
+    <span style="color: #ffffff">res[i]</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">(prediction</span> <span style="color: #ffffff">-</span> <span style="color: #ffffff">Y[i])</span> <span style="color: #ffffff">*</span> <span style="color: #ffffff">(prediction</span> <span style="color: #ffffff">-</span> <span style="color: #ffffff">Y[i])</span>  <span style="color: #008800; font-style: italic; background-color: #0f140f"># Compute the squared error for the i-th data point</span>
+  <span style="color: #ffffff">res</span> <span style="color: #ffffff">=</span> <span style="color: #0086f7; font-weight: bold">1.25</span> <span style="color: #ffffff">-</span> <span style="color: #ffffff">res</span>    <span style="color: #008800; font-style: italic; background-color: #0f140f"># We want the MSE to be at least 1.25, so g(theta) = 1.25-MSE</span>
+  <span style="color: #fb660a; font-weight: bold">return</span> <span style="color: #ffffff">res</span>
+</pre></div>
+
+              <!-- CODE --->
+
+            </div>
+          </p>
+
+
+          <p align="justify">
+            Later in this tutorial we will want the ordinary least-squares solution to be used as a starting point during the search for a candidate solution. The following code implements least squares linear regression:
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <!-- CODE --->
+              <!-- HTML generated using hilite.me -->
+              <!-- Style I used: fruity. CSS: padding:.2em .6em; -->
+<div style="background: #111111; overflow:auto;width:auto;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic; background-color: #0f140f"># Run ordinary least squares linear regression on data (X,Y)</span>
+<span style="color: #fb660a; font-weight: bold">def</span> <span style="color: #ff0086; font-weight: bold">leastSq</span><span style="color: #ffffff">(X,</span> <span style="color: #ffffff">Y):</span>
+  <span style="color: #ffffff">X</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">np.expand_dims(X,</span> <span style="color: #ffffff">axis=</span><span style="color: #0086f7; font-weight: bold">1</span><span style="color: #ffffff">)</span> <span style="color: #008800; font-style: italic; background-color: #0f140f"># Places the input  data in a matrix</span>
+  <span style="color: #ffffff">Y</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">np.expand_dims(Y,</span> <span style="color: #ffffff">axis=</span><span style="color: #0086f7; font-weight: bold">1</span><span style="color: #ffffff">)</span> <span style="color: #008800; font-style: italic; background-color: #0f140f"># Places the output data in a matrix</span>
+  <span style="color: #ffffff">reg</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">LinearRegression().fit(X,</span> <span style="color: #ffffff">Y)</span>
+  <span style="color: #ffffff">theta0</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">reg.intercept_[</span><span style="color: #0086f7; font-weight: bold">0</span><span style="color: #ffffff">]</span>   <span style="color: #008800; font-style: italic; background-color: #0f140f"># Gets theta0, the y-intercept coefficient</span>
+  <span style="color: #ffffff">theta1</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">reg.coef_[</span><span style="color: #0086f7; font-weight: bold">0</span><span style="color: #ffffff">][</span><span style="color: #0086f7; font-weight: bold">0</span><span style="color: #ffffff">]</span>     <span style="color: #008800; font-style: italic; background-color: #0f140f"># Gets theta0, the slope coefficient</span>
+  <span style="color: #fb660a; font-weight: bold">return</span> <span style="color: #ffffff">np.array([theta0,</span> <span style="color: #ffffff">theta1])</span>
+</pre></div>
+              <!-- CODE --->
+
+            </div>
+          </p>
+
+          <p align="justify">
+            We now have all of the libraries that we need and all of the functions to implement the problem that we specified earlier. Now we're ready to start writing our Seldonian algorithm! From here it's easy&mdash;by line-count, you've already written most of the code.
+          </p>
+          
+        </div>
+      </div>
+
+
+      
+
+
+      <div class="card-body">
+        <a href="tutorial3.html" type="button" class="btn btn-outline-primary">Previous: A simple Seldonian algorithm</a>
+
+        <div class="btn-group btn-group float-right" role="group" aria-label="Next">
+          <button type="button" class="btn btn-outline-secondary float-right" disabled>Next: Safety Test:</button>
+          <a href="tutorial5py.html" type="button" class="btn btn-success float-right">Python</a>          
+        </div>        
+
+<!-- 
+          <button type="button" class="btn btn-outline-secondary float-right" disabled>Next: Safety test:</button>
+          <a href="tutorial5cpp.html" type="button" class="btn btn-primary float-right">C++</a>          
+          <a href="tutorial5py.html" type="button" class="btn btn-success float-right">Python</a>          
+ -->
+
+      </div>
+
+      <hr class="my-4">
+    </div>
+
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>

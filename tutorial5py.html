@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Mathjax -->
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <title>AI Safety &middot; Tutorial 5</title>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+      <a class="navbar-brand" href="index.html">AI Safety</a>
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="overview.html">Overview</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="paper.html">Paper</a>
+        </li>
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+            Tutorials
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="tutorial0.html">Tutorial Overview</a>
+            <a class="dropdown-item" href="tutorial1.html">1. Seldonian algorithm review</a>
+            <a class="dropdown-item" href="tutorial2.html">2. Example problem</a>
+            <a class="dropdown-item" href="tutorial3.html">3. A simple Seldonian algorithm</a>
+            <hr>
+            <h6 class="dropdown-header text-primary"><b>C++</b></h6>
+            <a class="dropdown-item" href="tutorial4cpp.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item" href="tutorial5cpp.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item" href="tutorial6cpp.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <a class="dropdown-item" href="tutorial7cpp.html">&nbsp;&nbsp;&nbsp;7. Plotting</a>
+            <h6 class="dropdown-header text-success"><b>Python</b></h6>
+            <a class="dropdown-item" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item disabled" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <a class="dropdown-item" href="tutorial7py.html">&nbsp;&nbsp;&nbsp;7. Plotting</a>
+            <hr>
+            <a class="dropdown-item" href="tutorial8.html">8. Advanced Topics</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="code.html">Code</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="about.html">About Us</a>
+        </li>
+      </ul>
+      <!--<ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="donate.html">Donate</a>
+        </li>
+      </ul>-->
+    </nav>
+
+    <!-- Begin Content -->
+    <div class="container">
+      <div class="card bg-light mt-2">
+        <div class="card-body">
+          <h2>Safety Test</h2>
+          <p align="justify">
+            Before we implement the safety test, let us write a shell for our quasi-Seldonian algorithm, which we will call <code>QSA</code>. This shell code will show how the safety test will be used. At a high level, we are simply partitioning the data, getting a candidate solution, and running the safet test.
+            <ul>
+              <li>Notice that in the code below we are using the more descriptive names: <code>candidateData</code> for \(D_1\) and <code>safetyData</code> for \(D_2\)</li>
+              <li>Notice also that we are placing 40% of the data in <code>candidateData</code> and 60% in <code>safetyData</code>. This is an arbitrary choice and it remains an open question how best to optimize this partitioning of the data.</li>
+            </ul>
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <!-- CODE --->
+              <!-- HTML generated using hilite.me -->
+              <!-- Style I used: fruity. CSS: padding:.2em .6em; -->
+<div style="background: #111111; overflow:auto;width:auto;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic; background-color: #0f140f"># Our Quasi-Seldonian linear regression algorithm operating over data (X,Y).</span>
+<span style="color: #008800; font-style: italic; background-color: #0f140f"># The pair of objects returned by QSA is the solution (first element) </span>
+<span style="color: #008800; font-style: italic; background-color: #0f140f"># and a Boolean flag indicating whether a solution was found (second element).</span>
+<span style="color: #fb660a; font-weight: bold">def</span> <span style="color: #ff0086; font-weight: bold">QSA</span><span style="color: #ffffff">(X,</span> <span style="color: #ffffff">Y,</span> <span style="color: #ffffff">gHats,</span> <span style="color: #ffffff">deltas):</span>
+  <span style="color: #008800; font-style: italic; background-color: #0f140f"># Put 40% of the data in candidateData (D1), and the rest in safetyData (D2)</span>
+  <span style="color: #ffffff">candidateData_len</span> <span style="color: #ffffff">=</span> <span style="color: #0086f7; font-weight: bold">0.40</span>
+  <span style="color: #ffffff">candidateData_X,</span> <span style="color: #ffffff">safetyData_X,</span> <span style="color: #ffffff">candidateData_Y,</span> <span style="color: #ffffff">safetyData_Y</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">train_test_split(</span>
+                <span style="color: #ffffff">X,</span> <span style="color: #ffffff">Y,</span> <span style="color: #ffffff">test_size=</span><span style="color: #0086f7; font-weight: bold">1</span><span style="color: #ffffff">-candidateData_len,</span> <span style="color: #ffffff">shuffle=</span><span style="color: #fb660a; font-weight: bold">False</span><span style="color: #ffffff">)</span>
+  
+  <span style="color: #008800; font-style: italic; background-color: #0f140f"># Get the candidate solution</span>
+  <span style="color: #ffffff">candidateSolution</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">getCandidateSolution(candidateData_X,</span> <span style="color: #ffffff">candidateData_Y,</span> <span style="color: #ffffff">gHats,</span> <span style="color: #ffffff">deltas,</span> <span style="color: #ffffff">safetyData_X.size)</span>
+
+  <span style="color: #008800; font-style: italic; background-color: #0f140f"># Run the safety test</span>
+  <span style="color: #ffffff">passedSafety</span>      <span style="color: #ffffff">=</span> <span style="color: #ffffff">safetyTest(candidateSolution,</span> <span style="color: #ffffff">safetyData_X,</span> <span style="color: #ffffff">safetyData_Y,</span> <span style="color: #ffffff">gHats,</span> <span style="color: #ffffff">deltas)</span>
+
+  <span style="color: #008800; font-style: italic; background-color: #0f140f"># Return the result and success flag</span>
+  <span style="color: #fb660a; font-weight: bold">return</span> <span style="color: #ffffff">[candidateSolution,</span> <span style="color: #ffffff">passedSafety]</span>
+</pre></div>
+              <!-- CODE --->
+            </div>
+          </p>
+
+          <p align="justify">
+            Now recall the pseudocode for the safety test:
+          </p>
+          <div class="row bg-dark text-light">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+              <p>                
+                3. <b>Safety Test</b>: Return \(\theta_c\) if
+                $$
+                \forall i \in \{1,2,\dotsc,n\}, \quad \hat \mu(\hat g_i(\theta_c,D_2)) + \frac{\hat \sigma(\hat g_i(\theta_c,D_2))}{\sqrt{|D_2|}}t_{1-\delta_i,|D_2|-1} \leq 0,
+                $$
+                and No Solution Found (NSF) otherwise.
+              </p>
+            </div>
+            <div class="col-md-2"></div>
+          </div>
+
+          <p align="justify">
+            Given the helper functions that we already have, this function is straightforward to write:
+            <div class="shadow-lg p-5 mb-5 bg-light rounded">
+              <!-- CODE --->
+              <!-- HTML generated using hilite.me -->
+              <!-- Style I used: fruity. CSS: padding:.2em .6em; -->
+<div style="background: #111111; overflow:auto;width:auto;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-style: italic; background-color: #0f140f"># Run the safety test on a candidate solution. Returns true if the test is passed.</span>
+<span style="color: #008800; font-style: italic; background-color: #0f140f">#   candidateSolution: the solution to test. </span>
+<span style="color: #008800; font-style: italic; background-color: #0f140f">#   (safetyData_X, safetyData_Y): data set D2 to be used in the safety test.</span>
+<span style="color: #008800; font-style: italic; background-color: #0f140f">#   (gHats, deltas): vectors containing the behavioral constraints and confidence levels.</span>
+<span style="color: #fb660a; font-weight: bold">def</span> <span style="color: #ff0086; font-weight: bold">safetyTest</span><span style="color: #ffffff">(candidateSolution,</span> <span style="color: #ffffff">safetyData_X,</span> <span style="color: #ffffff">safetyData_Y,</span> <span style="color: #ffffff">gHats,</span> <span style="color: #ffffff">deltas):</span>
+
+  <span style="color: #fb660a; font-weight: bold">for</span> <span style="color: #ffffff">i</span> <span style="color: #ffffff">in</span> <span style="color: #ffffff">range(len(gHats)):</span>  <span style="color: #008800; font-style: italic; background-color: #0f140f"># Loop over behavioral constraints, checking each</span>
+    <span style="color: #ffffff">g</span>         <span style="color: #ffffff">=</span> <span style="color: #ffffff">gHats[i]</span>  <span style="color: #008800; font-style: italic; background-color: #0f140f"># The current behavioral constraint being checked</span>
+    <span style="color: #ffffff">delta</span>     <span style="color: #ffffff">=</span> <span style="color: #ffffff">deltas[i]</span> <span style="color: #008800; font-style: italic; background-color: #0f140f"># The confidence level of the constraint</span>
+
+    <span style="color: #008800; font-style: italic; background-color: #0f140f"># This is a vector of unbiased estimates of g(candidateSolution)</span>
+    <span style="color: #ffffff">g_samples</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">g(candidateSolution,</span> <span style="color: #ffffff">safetyData_X,</span> <span style="color: #ffffff">safetyData_Y)</span> 
+
+    <span style="color: #008800; font-style: italic; background-color: #0f140f"># Check if the i-th behavioral constraint is satisfied</span>
+    <span style="color: #ffffff">upperBound</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">ttestUpperBound(g_samples,</span> <span style="color: #ffffff">delta)</span> 
+
+    <span style="color: #fb660a; font-weight: bold">if</span> <span style="color: #ffffff">upperBound</span> <span style="color: #ffffff">&gt;</span> <span style="color: #0086f7; font-weight: bold">0.0</span><span style="color: #ffffff">:</span> <span style="color: #008800; font-style: italic; background-color: #0f140f"># If the current constraint was not satisfied, the safety test failed</span>
+      <span style="color: #fb660a; font-weight: bold">return</span> <span style="color: #fb660a; font-weight: bold">False</span>
+
+  <span style="color: #008800; font-style: italic; background-color: #0f140f"># If we get here, all of the behavioral constraints were satisfied      </span>
+  <span style="color: #fb660a; font-weight: bold">return</span> <span style="color: #fb660a; font-weight: bold">True</span>
+</pre></div>
+
+              <!-- CODE --->
+            </div>
+          </p>
+
+          <p align="justify">
+            We're almost there. All that's left is the the function getCandidateSolution!
+          </p>
+
+
+        </div>
+      </div>
+
+
+      
+
+
+      <div class="card-body">
+
+        <div class="btn-group btn-group float-left" role="group" aria-label="Next">
+          <button type="button" class="btn btn-outline-secondary" disabled>Previous: Coding environment setup:</button>
+          <a href="tutorial4py.html" type="button" class="btn btn-success">Python</a>
+        <!-- <a href="tutorial4cpp.html" type="button" class="btn btn-outline-primary">Previous: Coding environment setup</a> -->
+        </div>
+
+        <div class="btn-group btn-group float-right" role="group" aria-label="Next">
+          <button type="button" class="btn btn-outline-secondary float-right" disabled>Next: Candidate Selection:</button>
+          <a href="tutorial6py.html" type="button" class="btn btn-success float-right">Python</a>          
+        </div>        
+
+        <!-- <a href="tutorial6cpp.html" type="button" class="btn btn-primary float-right">Next: Candidate selection</a> -->
+      </div>
+
+      <hr class="my-4">
+    </div>
+
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>
