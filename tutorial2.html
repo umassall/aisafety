@@ -41,12 +41,13 @@
             <a class="dropdown-item" href="tutorial4cpp.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
             <a class="dropdown-item" href="tutorial5cpp.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
             <a class="dropdown-item" href="tutorial6cpp.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
-            <h6 class="dropdown-header text-success"><b>Python (COMING SOON)</b></h6>
-            <a class="dropdown-item disabled" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
-            <a class="dropdown-item disabled" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
-            <a class="dropdown-item disabled" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <a class="dropdown-item" href="tutorial7cpp.html">&nbsp;&nbsp;&nbsp;7. Plotting</a>
+            <h6 class="dropdown-header text-success"><b>Python</b></h6>
+            <a class="dropdown-item" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <a class="dropdown-item" href="tutorial7py.html">&nbsp;&nbsp;&nbsp;7. Plotting</a>
             <hr>
-            <a class="dropdown-item" href="tutorial7.html">7. Plotting</a>
             <a class="dropdown-item" href="tutorial8.html">8. Advanced Topics</a>
           </div>
         </li>
@@ -70,17 +71,17 @@
         <div class="card-body">
           <h2>Simple Problem: Hello Seldonian Machine Learning!</h2>
           <p align="justify">
-            We begin with a simple problem that can be solved using a Seldonian algorithm. This is the <a href="https://en.wikipedia.org/wiki/%22Hello,_World!%22_program">Hello World!</a> of Seldonian machine learning. When first solving this problem, we will hold off on providing a slick interface, and first focus on the core computational components of a Seldonian algorithm. 
+            We begin with a simple problem that can be solved using a Seldonian algorithm. This is the <a href="https://en.wikipedia.org/wiki/%22Hello,_World!%22_program">Hello World!</a> of Seldonian machine learning. When first solving this problem, we will hold off on providing a slick interface, and focus on the core computational components of a Seldonian algorithm. 
           </p>
           <p align="justify">
-            This is a <em>regression</em> problem. Let \(X \in \mathbb R\) and \(Y \in \mathbb R\) be two dependent random variables. Our goal is to estimate \(Y\) given \(X\) and training data consisting of \(m\) independent and identically distributed samples, \(\{(X_i,Y_i)\}_{i=1}^m\). Although the Seldonian algorithm will not know the distributions of \(X\) and \(Y\), we will be writing the code to generate the training data samples, and so we must know how to generated samples of \(X\) and \(Y\):
+            In this tutorial we will consider a <em>regression</em> problem. Let \(X \in \mathbb R\) and \(Y \in \mathbb R\) be two dependent random variables. Our goal is to estimate \(Y\) given \(X\), based on training data consisting of \(m\) independent and identically distributed samples, \(\{(X_i,Y_i)\}_{i=1}^m\). In this example we construct synthetic data where the inputs \(X\) come from a standard normal distribution and where the outputs \(Y\)are equal to the inputs, plus noise with a standard normal distribution:
             $$
             X \sim N(0,1)\quad\text{ and } \quad Y \sim N(X,1),
             $$
-            where \(N(\mu,\sigma^2)\) denotes the normal distribution with mean \(\mu\) and variance \(\sigma^2\). 
+            where \(N(\mu,\sigma^2)\) denotes the normal distribution with mean \(\mu\) and variance \(\sigma^2\). Notice that Seldonian algorithms will <em>not</em> know the distributions of \(X\) and \(Y\) in advance.
           </p>
           <p align="justify">
-            The plot below shows 50,000 points sampled in this way (with transparency to better see the distribution):
+            The plot below shows 50,000 points sampled in this way:
           </p>
           <div class="container">
             <div class="row">
@@ -93,47 +94,65 @@
             </div>
           </div>
           <p align="justify">
-            Let \(\Theta = \mathbb R^n\) and let the estimate of \(Y\) given \(X\) and \(\theta\) be \(\hat y(X,\theta)=\theta_1 X + \theta_2\). The <em>mean squared error</em> (MSE) of a solution \(\theta\) is 
+            Let \(\Theta = \mathbb R^2\) and let \(\hat y(X,\theta)=\theta_1 X + \theta_2\) be the estimate of \(Y\) given \(X\) and \(\theta\). The <em>mean squared error</em> (MSE) of a solution \(\theta\) is 
             $$
             \operatorname{MSE}(\theta)=\mathbf E\left [ (\hat y(X,\theta)-Y)^2\right ].
             $$
-            Our goal is to find an algorithm that minimizes the mean squared error, and so our sample objective is the negative sample mean squared error:
-            $$
-            \hat f(\theta,D)=-\frac{1}{n}\sum_{i=1}^n (\hat y(X_i,\theta)-Y_i)^2. 
-            $$
-            We use the <em>negative</em> sample MSE because our algorithm will attempt to maximize \(f\), while we want to minimize MSE.
-          </p>
-
-          <p align="justify">
-            We consider the problem of creating a linear regression algorithm that ensures that, with probability at least 0.9, the mean squared error of its predictions is below 2.0, and also with probability at least 0.9, the mean squared error if its predictions is above 1.25. That is \(n=2\) (there are two behavioral constraints) and:
+            In our example, the goal of the designer of the algorithm is to construct an algorithm that
             <ul>
-              <li>\(g_1(\theta)=\operatorname{MSE}(\theta)-2.0\) and \(\delta_1=0.1\).</li>
-              <li>\(g_2(\theta)=1.25 - \operatorname{MSE}(\theta)\) and \(\delta_1=0.1\).</li>
+              <li> minimizes the expected mean squared error (or, equivalently, maximizes the <em>negative</em> of the MSE). Here, the expectation is over the solutions produced by the algorithm when evaluated over the possible datasets in \(\mathcal D\); and</li>
+              <li> ensures that, with probability at least 0.9, the mean squared error of its predictions is below 2.0; and that with probability at least 0.9, the mean squared error if its predictions is above 1.25. </li>
             </ul>
           </p>
 
           <p align="justify">
-            For now we will consider an interface that is not particularly easy to use, as it requires the user to write code to define undesirable behavior: we assume that the user provides a function \(\hat g_i\) for each behavioral constraint such that \(\hat g_i(\theta,D)\) is a vector of independent and identically distributed unbiased estimates of \(g(\theta)\). That is, if \(g_{i,j}(\theta,D)\) is the \(j^\text{th}\) output of \(\hat g_i(\theta,D)\), then for every \(i\) and \(j\):
-            $$
-            g_i(\theta)=\mathbf E[\hat g_{i,j}(\theta,D)].
-            $$
-            In our case, 
-            $$
-            \hat g_{1,j}(\theta,D) = (\hat y(X_j,\theta)-Y_j)^2-2.0,
-            $$
-            and
-            $$
-            \hat g_{2,j}(\theta,D) = 1.25-(\hat y(X_j,\theta)-Y_j)^2.
-            $$
+            In other words, the designer wishes to create an algorithm \(a\) that maximizes \(f(a)\) (where \(f(a)\) is the expected negative MSE) and that satisfies \(n=2\) behavioral constraints, \(g_1\) and \(g_2\), with probabilities \(1-\delta_1\) and \(1-\delta_2\), respectively. The behavioral constraints, then, are
+            
+            <ul>
+              <li>\(g_1(\theta)=\operatorname{MSE}(\theta)-2.0\) and \(\delta_1=0.1\)</li>
+              <li>\(g_2(\theta)=1.25 - \operatorname{MSE}(\theta)\) and \(\delta_2=0.1\)</li>
+            </ul>
           </p>
 
           <p align="justify">
-            This synthetic example was constructed to be simple, and yet also to test the ability of a Seldonian algorithm to handle behavioral constraints that are in conflict with the objective function (the solution that minimizes the MSE will violate the second behavioral constraint). Once we have created a quasi-Seldonian algorithm for this problem, extending our algorithm to include a simple interface and to the general regression and classification settings is relatively simple and discussed in a later tutorial.
+
+          Because the algorithm does not have prior access to the distributions of \(X\) and \(Y\), it cannot compute MSE(\(\theta\)) analytically for any given candidate solution \(\theta\). More generally, because we do not know the user's application&mdash;to which datasets he or she will apply the algorithm&mdash;we cannot compute the value of \(f(a)\) for any \(a\). We can, however, define a <em>sample objective function</em>, \(\hat f\), that estimates the utility of a given algorithm, \(a\), when \(a\) returns the solution \(\theta\) given input data \(D\). In our particular example, the sample objective function \(\hat f\) is the <em>sample mean squared error</em> of a given candidate solution \(\theta\):
+            $$
+            \hat f(\theta,D)=-\frac{1}{n}\sum_{i=1}^n (\hat y(X_i,\theta)-Y_i)^2. 
+            $$
+            Furthermore, notice that the behavioral constraints, \(g_1\) and \(g_2\), are also defined in terms of the MSE, which cannot be computed exactly. This means that \(g_1\) and \(g_2\) cannot be computed analytically either. Instead of requiring the user to produce \(g_1\) and \(g_2\), we allow the user to specify functions \(\hat g_i\) that provide unbiased estimates of each corresponding constraint \(g_i\). In particular, each function \(\hat g_i(\theta,D)\) uses data to compute a vector of independent and identically distributed (i.i.d.) unbiased estimates of \(g_i(\theta)\). Let \(g_{i,j}(\theta,D)\) be the \(j^\text{th}\) unbiased estimate returned by \(\hat g_i(\theta,D)\). In our regression application, we compute these unbiased estimates of the behavioral constraints as follows:
+            <ul>
+              <li>\(\hat g_{1,j}(\theta,D) = (\hat y(X_j,\theta)-Y_j)^2-2.0\), and</li>
+              <li>\(\hat g_{2,j}(\theta,D) = 1.25-(\hat y(X_j,\theta)-Y_j)^2\)</li>
+            </ul>
+
+            Notice that because \(g_{i,j}(\theta,D)\) are i.i.d. unbiased estimates of \(g_i\), for every \(i\) and \(j\), it follows that \(g_i(\theta)=\mathbf E[\hat g_{i,j}(\theta,D)]\).
+          </p>
+        </div>
+      </div>
+
+      <div class="card bg-light mt-2">
+        <div class="card-body">
+          <h2>Recap</h2>
+
+          <p align="justify">
+            <ul>
+              <li>A Seldonian algorithm \(a\) maximizes an objective function \(f\) and ensures that all behavioral constraints are satisfied.</li>
+              <li>In this example we wish to create a linear regression algorithm that guarantees with probabiliy \(0.9\) that the MSE of its predictions is below \(2.0\) and with probability \(0.9\) that the MSE of its predictions is above \(1.25\)</li>
+              <li>By <a href="https://en.wikipedia.org/wiki/Boole%27s_inequality">Boole's inequality</a>, this implies that with probability \(0.8\) the MSE of its predictions is in the interval \([1.25,2.0]\).</li>
+              <li>In our example, \(f(a)\) is the expected negative MSE of the solution that algorithm \(a\) will return for the user's application. We do not know the value of \(f(a)\) for any \(a\), as we do not know in advance the user's application when creating the algorithm.</li> 
+              <li>Instead, we will require the user to provide a <em>sample objective function</em>, \(\hat f:\Theta \times \mathcal D \to \mathbb R\), such that \(\hat f(\theta,D)\) is an estimate of the utility of any algorithm that returns the solution \(\theta\) when given input data \(D\). In this example, \(\hat f\) is the <em>sample mean squared error</em>: \(\hat f(\theta,D)=\frac{1}{n}\sum_{i=1}^n (\hat y(X_i,\theta)-Y_i)^2\).</li>
+              <li>We will test our algorithm on a simple data set where the inputs come from a standard normal distribution and the outputs are equal to the inputs, plus noise with a standard normal distribution.</li>
+              <li>We will begin by using an interface that makes <em>creating</em> the Seldonian algorithm easier. Our initial interface will require the user to provide functions \(\hat g_i\). Later we will focus on interfaces that make it easier for users to <em>define and identify</em> undesirable behavior.</li>
+              <li>Our example application was constructed to be simple, and yet also to test the ability of a Seldonian algorithm to handle behavioral constraints that may be in conflict with the objective function. Notice, for instance, that the solution that minimizes the MSE will violate the second behavioral constraint.</li>
+              <li>Once we have created a quasi-Seldonian algorithm for this problem, we will discuss how to create simpler interfaces to specify undesirable behavior and how to apply these ideas to the general regression and classification settings.</li>
+            </ul>
           </p>
 
           <p align="justify">
-            In summary, we will creating a linear regression algorithm that guarantees with probabiliy \(0.9\) the MSE of its predictions is below \(2.0\) and with probability \(0.9\) the MSE of its predictions is above \(1.25\). By <a href="https://en.wikipedia.org/wiki/Boole%27s_inequality">Boole's inequality</a>, this implies that with probability \(0.8\) the MSE of its predictions is in the interval \([1.25,2.0]\). We will test our algorithm on a simple data set where the inputs come from a standard normal distribution and the outputs are equal to the inputs, plus noise with a standard normal distribution.
+            
           </p>
+
 
         </div>
       </div>

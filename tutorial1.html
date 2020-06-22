@@ -41,12 +41,13 @@
             <a class="dropdown-item" href="tutorial4cpp.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
             <a class="dropdown-item" href="tutorial5cpp.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
             <a class="dropdown-item" href="tutorial6cpp.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
-            <h6 class="dropdown-header text-success"><b>Python (COMING SOON)</b></h6>
-            <a class="dropdown-item disabled" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
-            <a class="dropdown-item disabled" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
-            <a class="dropdown-item disabled" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <a class="dropdown-item" href="tutorial7cpp.html">&nbsp;&nbsp;&nbsp;7. Plotting</a>
+            <h6 class="dropdown-header text-success"><b>Python</b></h6>
+            <a class="dropdown-item" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <a class="dropdown-item" href="tutorial7py.html">&nbsp;&nbsp;&nbsp;7. Plotting</a>
             <hr>
-            <a class="dropdown-item" href="tutorial7.html">7. Plotting</a>
             <a class="dropdown-item" href="tutorial8.html">8. Advanced Topics</a>
           </div>
         </li>
@@ -70,7 +71,7 @@
         <div class="card-body">
           <h2>Disclaimer</h2>
            <p align="justify">
-            We recommend that you read Section 3 of the supplementary materials of our paper<sup>[<a href="https://science.sciencemag.org/lookup/doi/10.1126/science.aag3311">link</a>]</sup> for the formal definition of our framework and Seldonian algorithms. Here we provide an extremely brief recap. Although this page summarizes our framework and Seldonian algorithms, it does not walk through <em>why</em> the framework is the way it is, or how it compares to the previous standard approach for designing machine learning algorithms&mdash;that is the purpose of the paper.
+            We recommend that you read Section 3 of the supplementary materials of our <a href="https://science.sciencemag.org/lookup/doi/10.1126/science.aag3311">paper</a> for the formal definition of our framework and Seldonian algorithms. Here we provide an extremely brief recap. Although this tutorial summarizes our framework and Seldonian algorithms, it does not walk through <em>why</em> the framework is the way it is, or how it compares to the previous standard approach for designing machine learning algorithms&mdash;that is the purpose of the paper.
           </p>
         </div>
       </div>
@@ -82,28 +83,29 @@
             <ul>
               <li>\(\mathcal D\) is the set of all possible inputs (data sets) to the algorithm.</li>
               <li> \(\Theta\) is the set of all possible outputs of the algorithm, each of which we refer to as a <em>solution</em> \(\theta \in \Theta\).
-              <li>\(D\) is the data set input to the algorithm, which we view as a <a href="https://en.wikipedia.org/wiki/Random_variable">random variable</a>.</li>
+              <li>\(D\) is the data set given as input to the algorithm, which we view as a <a href="https://en.wikipedia.org/wiki/Random_variable">random variable</a>.</li>
               <li>\(a:\mathcal D \to \Theta\) is a machine learning algorithm, which takes a data set as input and returns a solution. That is, \(a(D)\) is the solution (an element of \(\Theta\)) output by the algorithm when run on input \(D\). Any random numbers required by the algorithm should be included in \(D\).</li>
               <li>\(\mathcal A\) is the set of all possible machine learning algorithms.</li>
-              <li>\(f:\mathcal A \to \mathbb R\) is the <em>objective function</em> of the algorithm designer. That is, the algorithm designer's goal is to find an algorithm that maximizes \(f\), subject to the behavioral constraints.</li>
+              <li>\(f:\mathcal A \to \mathbb R\) is the <em>objective function</em> of the algorithm designer. The goal of the designer of the algorithm is to find an algorithm that maximizes \(f\), subject to the behavioral constraints.</li>
               <li>\(n\) is the number of <em>behavioral constraints</em>.</li>
-              <li>\((g_i,\delta_i)_{i=1}^n\) is the set of \(n\) behavioral constraints, each of which contains a <em>constraint function</em> \(g_i:\Theta\to\mathbb R\) and a <em>confidence level</em> \(\delta_i\).</li>
+              <li>\((g_i,\delta_i)_{i=1}^n\) is a set of \(n\) behavioral constraints, each of which contains a <em>constraint function</em> \(g_i:\Theta\to\mathbb R\) and a <em>confidence level</em> \(\delta_i\).</li>
                 <ul>
                   <li>The constraint function measures undesirable behavior: we say that \(\theta \in \Theta\) produces undesirable behavior if and only if \(g_i(\theta) > 0\).</li>
-                  <li>The confidence level specifies the maximum probability that the algorithm can return a solution \(\theta\) where \(g(\theta)>0\).</li>
+                  <li>The confidence level specifies the maximum probability that the algorithm can return a solution \(\theta\) where \(g_i(\theta)>0\).</li>
                 </ul>
               </li>
             </ul>
             A <em>Seldonian algorithm</em> ensures that for all \(i \in \{1,2,\dotsc,n\}\):
             $$\Pr(g_i(a(D))\leq 0)\geq 1-\delta_i.$$
-            An algorithm is <em>quasi-Seldonian</em> if it relies on reasonable but false assumptions, such as appeals to the central limit theorem common in scientific research. As quasi-Seldonian algorithms tend to be more practical than Seldonian algorithms, we focus on creating a quasi-Seldonian algorithm here, but discuss how it could be transformed into a Seldonian algorithm.
+            In other words, a Seldonian algorithm \(a\) returns, with high probability, a solution that does not break any of the behavioral constraints. An algorithm is <em>quasi-Seldonian</em> if it relies on reasonable but possibly false assumptions regarding the data being analyzed. These assumptions often appeal, for instance, to the central limit theorem, common in scientific research. As quasi-Seldonian algorithms tend to be more practical and data-efficient than Seldonian algorithms, we focus on creating a quasi-Seldonian algorithm here.
             <br><br>
-            Initially in this tutorial we begin by assuming that the following functions have been provided:
+<!--             In this tutorial we begin by assuming that the following functions have been provided:
             <ul>
-              <li>\(\hat f:\Theta \times \mathcal D \to \mathbb R\) is the <em>sample objective function</em>, such that \(\hat f(a(D),D')\) is an estimate of \(f(a)\) created from data sets \(D\) and \(D'\).</li>
-              <li>\(\hat g_i:\Theta \times \mathcal D \to \mathbb R\) is defined such that \(\hat g_i(\theta,D)\) is an unbiased estimator of \(g(\theta)\).</li>
-            </ul>
-            After we have created our first quasi-Seldonian algorithm in this setting, we describe more sophisticated interfaces that do not require \(\hat g_i\) to be provided by the user.
+              <li>\(\hat f:\Theta \times \mathcal D \to \mathbb R\) is the <em>sample objective function</em>, such that \(\hat f(a(D),D')\) is an estimate of \(f(a)\) created from data sets \(D\) and \(D'\). It uses these datasets to estimate how well the algorithm performs according to the objective function provided by the designer.</li>
+              <li>\(\hat g_i:\Theta \times \mathcal D \to \mathbb R\) is defined such that \(\hat g_i(\theta,D)\) is an unbiased estimator of \(g(\theta)\). These functions can be used to estimate whether the algorithm satisfies each of the behavioral constraints. </li>
+            </ul> -->
+            <!-- After we have created our first quasi-Seldonian algorithm in this setting, we describe more sophisticated interfaces that do not require \(\hat g_i\) to be provided by the user. -->
+            After we have created our first quasi-Seldonian algorithm in this setting, we describe more sophisticated interfaces that make it easier for users of the algorithm to specify undesirable behaviors.
           </p>
         </div>
       </div>
@@ -116,20 +118,20 @@
           </p>
           <ol>
             <li>
-              <b>Define the goal for the algorithm design process.</b> In this step, the designer of the algorithm writes down an expression that captures their goals. This expression should have the form:
+              <b>Define the goal of the designer of the algorithm.</b> In this step, the designer of the algorithm writes down an expression that captures their goals when constructing a safe machine learning algorithm. This expression should have the form:
               $$\arg\max_{a \in \mathcal A} f(a)\\\text{s.t. }\forall i \in \{1,\dotsc,n\},\quad\Pr(g_i(a(D))\leq 0)\geq 1-\delta_i.$$
-              This differs from the standard framework wherein we typically write down the goals of the algorithm. If this is not clear, notice that here the objective function and behavioral constraints are over algorithms, not solutions. <em>Algorithms</em> satisfy \(\Pr(g_i(a(D))\leq 0)\geq 1-\delta_i\), not <em>solutions</em>. This differs from the standard framework where we begin by writing the goal of the algorithm, which is to find a solution in
+              This expression means that the goal of the designer is to identify an algorithm \(a\) that maximizes the objective function \(f\) while ensuring that, with high probability, it will only return solutions that satisfy all behavioral constraints. This differs from the standard framework wherein we typically write down the goals of the algorithm. If this is not clear, notice that the expression \(\Pr(g_i(a(D))\leq 0)\geq 1-\delta_i\) is satisfied by a given <em>candidate algorithm</em> \(a\), constructed by the designer, not by a given <em>candidate solution</em> that the algorithm may return. By contrast, in the standard framework we begin by writing the goal of the algorithm&mdash;to find a <em>solution</em> \(\theta \in \Theta\) that maximizes \(f\):
               $$\arg\max_{\theta \in \Theta}f(\theta).$$
-              Here the constraint that \(\theta \in \Theta\) is a constraint that is satisfied by <em>solutions</em>. 
+              where the constraint that \(\theta \in \Theta\) is over the <em>candidate solutions</em> that will be analyzed by the algorithm, not over the <em>algorithms</em> that the designer may construct. 
             </li>
             <br>
             <li>
-              <b>Define the interface that the user will use.</b> In this step the designer of the algorithm specifies how future users of the algorithm will be able to specify each \(g_i\). This interface should be as easy to use as possible. For example, we should avoid requiring the user to provide code for \(g_i\) or the set of solutions such that \(g_i(\theta) \leq 0\), as the user typically will not know these quantities. Examples of interfaces include allowing users to provide unbiased estimators of each \(g_i\), allowing users to label outcomes as containing undesirable behavior or not, or allowing the user to write a mathematical expression for undesirable behavior in terms of a set of common variables, such as: <br><br><kbd>g(\theta)=abs(False_Positive_Male - False_Positive_Female) - 0.01</kbd>
-              <br><br>Later in these tutorials we will describe how each of these interfaces can function. We will begin with the first and most simple to implement: requiring the user to provide unbiased estimators, \(\hat g_i\).
+              <b>Define the interface that the user of the algorithm will use.</b> In this step the designer of the algorithm specifies how future users of the algorithm will be able to specify each behavioral constraint \(g_i\). This interface should be as easy to use as possible. For example, we should avoid requiring the user to provide code for \(g_i\) or the set of solutions \(\theta\) such that \(g_i(\theta) \leq 0\), as the user typically will not know these quantities. Examples of interfaces include allowing users to provide data-based unbiased estimators of each \(g_i\), allowing users to simply <em>label</em> outcomes that contain undesirable behavior, or allowing the user to write a mathematical expression for undesirable behavior in terms of a set of common variables, such as: <br><br><kbd>g(\(\theta\)) = abs(False_Positive_Male - False_Positive_Female) - 0.01</kbd>
+              <br><br>Later in these tutorial we will describe how each of these interfaces can function. We will begin with the first and most simple to implement: requiring the user to provide data-based unbiased estimators, \(\hat g_i\), of each behavioral constraint \(g_i\).
             </li>
             <br>
             <li>
-              <b>Create the algorithm.</b> In this step, the designer of the algorithm creates an algorithm that is an approximate solution to the optimization problem specified in the first step, while ensuring that the algorithm at least satisfies the behavioral constraints. This algorithm must also be compatible with the interface defined in the second step. 
+              <b>Create the algorithm.</b> In this step, the designer of the algorithm creates an algorithm \(a\) that is an approximate solution to the optimization problem specified in the first step, while ensuring that the algorithm satisfies the behavioral constraints with high probability. This algorithm must also be compatible with the interface defined in the second step. 
             </li>
           </ol>
         </div>

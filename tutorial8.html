@@ -41,12 +41,13 @@
             <a class="dropdown-item" href="tutorial4cpp.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
             <a class="dropdown-item" href="tutorial5cpp.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
             <a class="dropdown-item" href="tutorial6cpp.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
-            <h6 class="dropdown-header text-success"><b>Python (COMING SOON)</b></h6>
-            <a class="dropdown-item disabled" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
-            <a class="dropdown-item disabled" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
-            <a class="dropdown-item disabled" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <a class="dropdown-item" href="tutorial7cpp.html">&nbsp;&nbsp;&nbsp;7. Plotting</a>
+            <h6 class="dropdown-header text-success"><b>Python</b></h6>
+            <a class="dropdown-item" href="tutorial4py.html">&nbsp;&nbsp;&nbsp;4. Coding environment setup</a>
+            <a class="dropdown-item" href="tutorial5py.html">&nbsp;&nbsp;&nbsp;5. Safety test</a>
+            <a class="dropdown-item" href="tutorial6py.html">&nbsp;&nbsp;&nbsp;6. Candidate selection</a>
+            <a class="dropdown-item" href="tutorial7py.html">&nbsp;&nbsp;&nbsp;7. Plotting</a>
             <hr>
-            <a class="dropdown-item" href="tutorial7.html">7. Plotting</a>
             <a class="dropdown-item disabled" href="tutorial8.html">8. Advanced Topics</a>
           </div>
         </li>
@@ -70,7 +71,7 @@
         <div class="card-body">
           <h2>Advanced Topics</h2>
           <p align="justify">
-            In this tutorial we survey a few advanced topics, including how the <code>QSA</code> algorithm you implemented can be extended to provide the user with an easier-to-use interface, and how to create Seldonian reinforcement learning algorithms. For simplicity, on this page we often assume that there is a single behavioral constraint and drop the \(i\)-subscripts on \(g_i\) and \(\delta_i\).
+            In this tutorial, we survey a few advanced topics, including how the <code>QSA</code> algorithm you implemented can be extended to provide the user with an easier-to-use interface, and how to create Seldonian reinforcement learning algorithms. For simplicity, on this page we often assume that there is a single behavioral constraint and drop the \(i\)-subscripts on \(g_i\) and \(\delta_i\).
           </p>
         </div>
       </div>
@@ -79,13 +80,18 @@
         <div class="card-body">
           <h2>Interface: Labeling Undesirable Outcomes</h2>
           <p align="justify">
-            Consider our diabetes treatment example that we described earlier. In this case, we required the user of the algorithm to be able to label outcomes in the data as containing undesirable behavior or not (containing hypoglycemia or not). This interface is a particularly simple extension of <code>QSA</code>: labeling data as containing undesirable outcomes corresponds to the user providing the necessary values of \(\hat g\).
+            Consider the diabetes treatment example we described in our paper. In that example, we required the user of the algorithm to be able to <em>label</em> outcomes in the data as containing undesirable behavior or not (containing hypoglycemia or not). This type of interface is a particularly simple extension of <code>QSA</code>: <em>labeling data as containing undesirable outcomes corresponds to the user providing the necessary values of \(\hat g\)</em>.
           </p>
           <p align="justify">
-            This interface is a bit simpler in the reinforcement learning setting defined later, as the user only has to label the outcomes that occurred in the training data. It is a little less simple in the classification setting, where the user could indicate for each training point whether each possible prediction the system could make would be considered an undesirable outcome. In the regression setting that we are considering, this interface is the least powerful, as there are an infinite number of predictions the system could make, and so we cannot ask the user to label all of them. Instead, we will assume that the user provides a function that can label outcomes as either containing an undesirable outcome (1) or not (0).
+            <ul>
+              <li>This type of interface is simple in the reinforcement learning setting, since the user only has to label the outcomes that occurred in the training data.</li>
+              <li>It is a little less simple in the classification setting, where the user could have to indicate, for each training point, whether each possible prediction that the system could make would be considered an undesirable outcome.</li>
+              <li>Finally, in the regression setting that we are considering, a labeling interface is the least powerful, as there are an infinite number of predictions the system could make, and so we cannot ask the user to label all of them. Instead, we will assume that the user provides a function that can label outcomes as either containing an undesirable outcome (1) or not (0).</li>
+            </ul>
+              
           </p>
           <p align="justify">
-            Consider a single data point and prediction, \((X_i,Y_i, \hat y(X_i,\theta))\). Let the user's label be \(l(X_i, Y_i, \hat y(X_i,\theta))\), which is one for undesirable outcomes, and zero otherwise. Lastly, consider the case where the training data was generated using some current solution, \(\theta_\text{cur}\). Let 
+            Consider a single data point and corresponding prediction: \((X_i,Y_i, \hat y(X_i,\theta))\). Let the user's label be \(l(X_i, Y_i, \hat y(X_i,\theta))\), which is one for undesirable outcomes, and zero otherwise. Lastly, consider the case where the training data was generated using some current solution, \(\theta_\text{cur}\). Let 
             $$
             \hat g_{i,j}(\theta,D)=l(X_j, Y_j, \hat y(X_j,\theta))-l(X_j, Y_j, \hat y(X_j,\theta_\text{cur})).
             $$
@@ -101,10 +107,10 @@
             $$
             \Pr\left ( \Pr(U|a(D)) \leq \Pr(U|\theta_\text{cur}) \right ) \geq 1-\delta.
             $$
-            That is, the probability that the algorithm returns a solution that increases the probability of the undesirable outcome will be at most \(\delta\). 
+            This behavioral constraint ensures that the probability that the algorithm will return a new solution that <em>increases</em> the probability of the undesirable outcome (compared to the current solution) will be at most \(\delta\). 
           </p>
           <p align="justify">
-            Hence, if the user can identify undesirable outcomes when they occur, we can use these labels as the values of \(\hat g\) and the algorithm can bound the probability that it increases the frequency of undesirable outcomes. Also notice that we could replace the second term,  \(l(X_i, Y_i, \hat y(X_i,\theta_\text{cur}))\), in our definition of \(\hat g_{i,j}\) with a user-provided constant \(p\), in which case our algorithm would ensure that the probability that it returns a solution that causes the probability of undesirable outcomes to be greater than \(p\) will be at most \(\delta\). 
+            Hence, if the user can identify undesirable outcomes when they occur, we can use these labels as the values of \(\hat g\) and the algorithm can bound the probability that it increases the frequency of undesirable outcomes. Notice also that we could replace the second term,  \(l(X_i, Y_i, \hat y(X_i,\theta_\text{cur}))\), in our definition of \(\hat g_{i,j}\), with a user-provided constant \(p\), in which case our algorithm would ensure that the probability that it returns a solution that causes the probability of undesirable outcomes to be greater than \(p\) will be at most \(\delta\). 
           </p>
         </div>
       </div>
@@ -113,16 +119,16 @@
         <div class="card-body">
           <h2>Interface: Mathematical Expression for Undesirable Behavior</h2>
           <p align="justify">
-            One obvious extension of <code>QSA</code> is to provide some built-in definitions of \(\hat g\) that the user can select between. However, this approach could limit the set of definitions that the user can specify more than desired. This is also limited to definitions of \(g\) for which unbiased estimators exist. <a href="https://people.cs.umass.edu/~sgiguere/">Stephen Giguere</a> proposed a way to allow the user to define a large (uncountable!) number of definitions of \(g\) that includes definitions for which unbiased estimators of \(g\) do not exist.
+            <code>QSA</code> could be extended to provide a family of built-in definitions of \(\hat g\) that the user can select from. This is challenging because it could excessively limit the definitions of undesirable behavior that the user can specify, and because it is limited to definitions of \(g\) for which unbiased estimators exist. <a href="https://people.cs.umass.edu/~sgiguere/">Stephen Giguere</a> proposed a way to allow the user to define a large (uncountable!) number of definitions of \(g\) that includes definitions for which unbiased estimators of \(g\) do not exist.
           </p>
           <p align="justify">
-            Giguere's interface replaces the function \(\hat g\) with multiple functions, \(\hat z_1, \hat z_2,\dotsc,\hat z_k\) for some integer \(k\). Each of these functions is like \(\hat g\), but instead of providing unbiased estimates of \(g\), they provide unbiased estimates of other parameters \(z_1,z_2,\dotsc,z_k\), called <em>base variables</em>. More formally, for all \(i \in \{1,2,\dotsc,n\}\) and all \(j \in \{1,2,\dotsc,k\}\), \(z_i(\theta) = \mathbf{E}[\hat z_{i,j}(\theta,D)]\). For example, for the GPA-regression problem, base variables might include the MSE of the estimator, the MSE of the estimator for female applications, the mean over-prediction for male applicationts, etc. For the GPA-classification problem, base variables might include the false positive rate, and the false negative rate given that the applicant is male.
+            Giguere's interface replaces the function \(\hat g\) with multiple functions, \(\hat z_1, \hat z_2,\dotsc,\hat z_k\), for some integer \(k\). Each of these functions is like \(\hat g\), but instead of providing unbiased estimates of \(g\), they provide unbiased estimates of other parameters \(z_1,z_2,\dotsc,z_k\), called <em>base variables</em>. More formally, for all \(i \in \{1,2,\dotsc,n\}\) and all \(j \in \{1,2,\dotsc,k\}\), \(z_i(\theta) = \mathbf{E}[\hat z_{i,j}(\theta,D)]\). For example, for the GPA-regression problem, base variables might include the MSE of the estimator, the MSE of the estimator for female applications, the mean over-prediction for male applicationts, etc. For the GPA-classification problem, base variables might include the false positive rate and the false negative rate given that the applicant is male.
           </p>
           <p align="justify">
-            Rather than define \(\hat g\) in advance, Giguere proposes defining many common base variables in advance. The user of the algorithm can then <em>type</em> an equation for \(g(\theta)\) as a function of these base variables (assuming the base variables have been given names). Algorithms using Giguere's interface can then parse this equation, compute confidence intervals on the base variables (whether a one or two-sided interval is necessary for each base variable can be determined automatically), and then propagate the confidence intervals through the expression to obtain a high-confidence upper-bound on \(g(\theta)\). This interface is described in more detail in our upcoming NeurIPS <a href="http://papers.nips.cc/paper/9630-offline-contextual-bandits-with-high-probability-fairness-guarantees.pdf">paper</a>.
+            Rather than define \(\hat g\) in advance, Giguere proposes defining many common base variables in advance. The user of the algorithm can then <em>type</em> an equation for \(g(\theta)\) as a function of these base variables (assuming the base variables have been given names). Algorithms using Giguere's interface can then parse this equation, compute confidence intervals on the base variables (it is possible to automatically determine whether a one or two-sided interval is necessary for each base variable), and then propagate the confidence intervals through the expression to obtain a high-confidence upper-bound on \(g(\theta)\). This interface is described in more detail in our upcoming NeurIPS <a href="http://papers.nips.cc/paper/9630-offline-contextual-bandits-with-high-probability-fairness-guarantees.pdf">paper</a>.
           </p>
           <p>
-            Consider an example. What if the user typed: <kbd>g(\theta)= |MSE_Male - MSE_Female|- 0.1</kbd>? Here <code>MSE_Male</code> and <code>MSE_Female</code> correspond to two base variables that we pre-specify and provide to the user (really we would condition on different state features, which might correspond to race, ethnicity, or other features). This would parse into the following tree:
+            Consider an example where the user typed the following behavioral constraint: <kbd>\(g(\theta)\)= |MSE_Male - MSE_Female| - 1</kbd>. Here, <code>MSE_Male</code> and <code>MSE_Female</code> correspond to two base variables that we pre-specify and provide to the user&mdash;more generally, we could condition also on different state features, such as race, ethnicity, or other features. This would parse into the following tree:
           </p>
           <div class="container">
             <div class="row">
@@ -134,7 +140,7 @@
             </div>
           </div>
           <p align="justify">
-            Recall that the base variables <code>MSE_Male</code> and <code>MSE_Female</code> are ones that we have already built in by defining their corresponding unbiased estimators, \(\hat z\). Hence, just as we bounded \(g\) using \(\hat g\), we can bound \(z\) using \(\hat z\). This results in high-confidence bounds on both base variables. In this case we can automatically detect through the parse tree that we will need two-sided bounds (both upper and lower on these base variables). The image below then depicts how the confidence intervals on the base variabes (and the constant 1, which can also be viewed as a base variable) are propagated through the tree to get a high-confidence upper bound on \(g(\theta)\).
+            Recall that the base variables <code>MSE_Male</code> and <code>MSE_Female</code> are ones that we have already built in by defining their corresponding unbiased estimators, \(\hat z\). Hence, just as we bounded \(g\) using \(\hat g\), we can bound \(z\) using \(\hat z\). This results in high-confidence bounds on both base variables. In this case we can automatically detect, by analyzing the parse tree, that we will need two-sided bounds (both upper and lower on these base variables). The image below depicts how the confidence intervals on the base variabes (and the constant 1, which can also be viewed as a base variable) are propagated through the tree to get a high-confidence upper bound on \(g(\theta)\).
           </p>
           <div class="container">
             <div class="row">
@@ -146,10 +152,10 @@
             </div>
           </div>
           <p align="justify">
-            Here the red interval at the bottom is what we might obtain for the confidence interval on the base variable <code>MSE_Male</code> and the green interval is the confidence interval that we obtain for <code>MSE_Female</code> (when computing these require the confidence intervals on all base variables to hold simultaneously with probability \(\delta\)). Consider the minus operator&mdash;we can obtain a high-confidence interval on the output of the minus operator by taking the maximum red value minus the minimum green value to obtain a high-confidence upper bound, and the smallest red value minus the biggest green value to obtain a high-confidence lower bound. These results are depicted in yellow on the right. The next operator, <code>abs</code> makes any negative values positive, which in this case cuts off the negative values, as depicted in the yellow confidence interval on the left. Next, the top minus operator considers the confidence interval on the left minus one, giving the top blue confidence interval. As this is now a confidence interval on \(g(\theta)\), we check whether it is less than zero. Since it is, if this were the safety test, we would return the solution \(\theta\). Notice that this process can be automated for arbitrary trees that correspond to the expressions entered by the user.
+            Here the red interval at the bottom is what we might obtain for the confidence interval on the base variable <code>MSE_Male</code> and the green interval is the confidence interval that we obtain for <code>MSE_Female</code>. When computing these, we require the confidence intervals on all base variables to hold simultaneously with probability \(\delta\). Consider the minus operator: we can obtain a high-confidence interval on the output of the minus operator by taking the maximum red value minus the minimum green value to obtain a high-confidence upper bound, and the smallest red value minus the biggest green value to obtain a high-confidence lower bound. These results are depicted in yellow on the right. The next operator, <code>abs</code>, makes any negative values positive, which in this case cuts off the negative values, as depicted in the yellow confidence interval on the left. Next, the top minus operator considers the confidence interval on the left minus one, giving the top blue confidence interval. As this is now a confidence interval on \(g(\theta)\), we check whether it is less than zero. Since it is, the solution \(\theta\) would pass the safety test and be returned. Notice that this process can be automated for arbitrary trees that correspond to the expressions entered by the user.
           </p>
           <p align="justify">
-            This interface can be further extended by allowing the user to provide unbiased estimators for other base variables that we didn't already already think ahead to include, and by allowing the user to provide base variables for which they can compute confidence intervals given data, perhaps without constructing unbiased estimates (for an example, see Appendix G of our upcoming NeurIPS <a href="http://papers.nips.cc/paper/9630-offline-contextual-bandits-with-high-probability-fairness-guarantees.pdf">paper</a>). 
+            This interface can be further extended by allowing the user to provide unbiased estimators for other base variables that we didn't already think ahead to include, and by allowing the user to provide base variables for which they can compute confidence intervals given data, perhaps without constructing unbiased estimates (for an example, see Appendix G of our upcoming NeurIPS <a href="http://papers.nips.cc/paper/9630-offline-contextual-bandits-with-high-probability-fairness-guarantees.pdf">paper</a>). 
           </p>
         </div>
       </div>
@@ -158,10 +164,10 @@
         <div class="card-body">
           <h2>Reinforcement Learning</h2>
           <p align="justify">
-            Extending <code>QSA</code> to the classification setting is straightforward. However, extending it to the reinforcement learning setting is slightly more challenging. In the regression and classification settings (both forms of <em>supervised learning</em>), we can easily estimate quantities like the mean squared error and false positive rates of a solution, \(\theta\), given data. We simply apply the solution to the data and compute the sample mean squared error or sample false positive rate. However, in the reinforcement learning setting we cannot "apply the solution to the data," as the choice of solution changes the distribution of data that would be generated.
+            Extending <code>QSA</code> to the classification setting is straightforward. However, extending it to the reinforcement learning setting is slightly more challenging. In the regression and classification settings (both forms of <em>supervised learning</em>), we can easily estimate quantities like the mean squared error and false positive rates of a solution, \(\theta\), given data. We simply apply the solution to the data and compute the sample mean squared error or sample false positive rate. However, in the reinforcement learning setting we cannot "apply the solution to the data," since the choice of solution changes the distribution of data that would be generated.
           </p>
           <p align="justify">
-            In reinforcement learning, the problem of predicting what would happen if one solution (one policy) was used given data generated by a different solution (a different policy) is called <em>off-policy evaluation</em> or <em>off-policy policy evaluation</em>. The problem of obtaining confidence intervals around these predictions is called <em>high-confidence off-policy policy evaluation</em> (HCOPE). At the core of current Seldonian reinforcement learning algorithms are HCOPE algorithms that allow for high-confidence guarantees that the policy will only be changed when it is an improvement with respect to one or more reward functions (where reward functions could, for example, be labels on trajectories indicating whether an undesirable outcome occurred).
+            In reinforcement learning, the problem of predicting what would happen if one solution (a policy) was used given data generated by a different solution (a different policy) is called <em>off-policy evaluation</em> or <em>off-policy policy evaluation</em>. The problem of obtaining confidence intervals around these predictions is called <em>high-confidence off-policy policy evaluation</em> (HCOPE). At the core of current Seldonian reinforcement learning algorithms are HCOPE algorithms that allow for high-confidence guarantees that the policy will only be changed when it is an improvement with respect to one or more reward functions (where reward functions could, for example, be labels on trajectories indicating whether an undesirable outcome occurred).
           </p>
           <p align="justify">
             A complete review of HCOPE methods and reinforcement learning is beyond the scope of this tutorial. However, we refer the reader to the following sequence of papers, in order: <a href="https://www.cs.mcgill.ca/~dprecup/publications/PSD-01.pdf">1</a>, <a href="https://people.cs.umass.edu/~pthomas/papers/Thomas2015.pdf">2</a>, <a href="https://people.cs.umass.edu/~pthomas/papers/Thomas2015b.pdf">3</a>, <a href="http://proceedings.mlr.press/v48/jiang16.pdf">4</a>,  <a href="https://www.aaai.org/ocs/index.php/AAAI/AAAI17/paper/viewFile/15006/14182">5</a>, and <a href="https://people.cs.umass.edu/~pthomas/papers/Thomas2015c.pdf">6</a>. While there are <em>many</em> other fantastic papers in this area, these six provide a strong introduction.
@@ -173,13 +179,13 @@
         <div class="card-body">
           <h2>Open Problems</h2>
           <p align="justify">
-            The <code>QSA</code> algorithm that you have created, with the extention to reinforcement learning and the interface extentions listed above, is <em>the</em> state-of-the-art in Seldonian algorithms right now. However, as you have seen, this algorithm is built from simple components, and handles open problems with engineering hacks. This means that the field is wide open, waiting for your improved algorithms. Here I list some clear open problems.
+            The <code>QSA</code> algorithm that you have created, with the extention to reinforcement learning and the interface extentions listed above, is <em>the</em> current state-of-the-art in Seldonian algorithms. However, as you have seen, this algorithm is built from simple components and handles open problems with engineering hacks. This means that the field is wide open, waiting for your improved algorithms. Here we list some interesting open problems.
           </p>
           <ul>
             <li><p align="justify">How should the data be partitioned between the candidate and safety sets? Can this be phrased as an optimal stopping problem, where the candidate selection mechanism can pull as much data from the safety data set as it wants? If it pulls too little it will not produce a good candidate solution, while if it pulls too much the safety test's confidence intervals will be too loose to allow the candidate solution to pass.</p></li>
-            <li><p align="justify">Doubling the width of the safety test's confidence interval when predicting the safety test during candidate selection is a hack. Can this be replaced with a more principled method for predicting the outcome of the safety test (perhaps with high confidence)?</p></li>
+            <li><p align="justify">Doubling the width of the safety test's confidence interval, when predicting the safety test during candidate selection, is a hack. Can this be replaced with a more principled method for predicting the outcome of the safety test (perhaps with high confidence)?</p></li>
             <li><p align="justify">Is <code>QSA</code> consistent (under mild assumptions)? We have shown that a different Seldonian algorithm is consistent. This alternate algorithm is designed explicitly to facilitate this proof. Proving that <code>QSA</code> is consistent (under mild assumptions) would remove the need for the alternate design choices in that algorithm.</p></li>
-            <li><p align="justify">How can we make even easier-to-use interfaces? Can the user communicate with natural language or by providing demonstrations?</p></li>
+            <li><p align="justify">How can we design even easier-to-use interfaces? Can the user communicate with natural language or by providing demonstrations?</p></li>
             <li><p align="justify"><code>QSA</code> does not tell the user <em>why</em> it returned NSF when it does. Can <code>QSA</code> return a reason as well, such as that it expects to require a certain amount more data to return a solution in the future, or that some of the constraints it was provided are conflicting or otherwise impossible to satisfy?</p></li>
             <li><p align="justify">Can we extend the Seldonian framework to sequential problems?</p></li>
             <li><p align="justify">If a Seldonian algorithm returns NSF, then the next time the algorithm is run it must use entirely new data in the safety test to avoid the problem of multiple comparisons. How can we modify <code>QSA</code> to allow us to intelligently re-use data (for example using <a href="https://arxiv.org/pdf/1810.08240.pdf">confidence sequences</a> or the <a href="http://nematilab.info/bmijc/assets/091218_paper.pdf">reusable holdout</a>)?</p></li>
@@ -195,7 +201,14 @@
       </div>
 
       <div class="card-body">
-        <a href="tutorial7.html" type="button" class="btn btn-outline-primary">Previous: Plotting</a>
+
+        <!-- <a href="tutorial7.html" type="button" class="btn btn-outline-primary">Previous: Plotting</a> -->
+        <div class="btn-group btn-group float-left" role="group" aria-label="Next">
+          <button type="button" class="btn btn-outline-secondary float-right">Previous: Plotting</button>
+          <a href="tutorial7cpp.html" type="button" class="btn btn-primary float-right">C++</a>          
+          <a href="tutorial7py.html" type="button" class="btn btn-success float-right">Python</a>          
+        </div>        
+
       </div>
 
       <hr class="my-4">
