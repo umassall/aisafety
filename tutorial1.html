@@ -127,11 +127,11 @@
             <br>
             <li>
               <b>Define the interface that the user of the algorithm will use.</b> In this step the designer of the algorithm specifies how future users of the algorithm will be able to specify each behavioral constraint \(g_i\). This interface should be as easy to use as possible. For example, we should avoid requiring the user to provide code for \(g_i\) or the set of solutions \(\theta\) such that \(g_i(\theta) \leq 0\), as the user typically will not know these quantities. Examples of interfaces include allowing users to provide data-based unbiased estimators of each \(g_i\), allowing users to simply <em>label</em> outcomes that contain undesirable behavior, or allowing the user to write a mathematical expression for undesirable behavior in terms of a set of common variables, such as: <br><br><kbd>g(\(\theta\)) = abs(False_Positive_Male - False_Positive_Female) - 0.01</kbd>
-              <br><br>Later in these tutorial we will describe how each of these interfaces can function. We will begin with the first and most simple to implement: requiring the user to provide data-based unbiased estimators, \(\hat g_i\), of each behavioral constraint \(g_i\).
+              <br><br>Later in these tutorials we will describe how each of these interfaces can function. We will begin with the first and most simple to implement: requiring the user to provide data-based unbiased estimators, \(\hat g_i\), of each behavioral constraint function \(g_i\).
             </li>
             <br>
             <li>
-              <b>Create the algorithm.</b> In this step, the designer of the algorithm creates an algorithm \(a\) that is an approximate solution to the optimization problem specified in the first step, while ensuring that the algorithm satisfies the behavioral constraints with high probability. This algorithm must also be compatible with the interface defined in the second step. 
+              <b>Create the algorithm.</b> In this step, the designer of the algorithm creates an algorithm \(a\) that is an approximate solution to the optimization problem specified in the first step, while ensuring that the algorithm satisfies the behavioral constraints. This algorithm must also be compatible with the interface defined in the second step. 
             </li>
           </ol>
         </div>

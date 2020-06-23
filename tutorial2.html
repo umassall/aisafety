@@ -100,13 +100,13 @@
             $$
             In our example, the goal of the designer of the algorithm is to construct an algorithm that
             <ul>
-              <li> minimizes the expected mean squared error (or, equivalently, maximizes the <em>negative</em> of the MSE). Here, the expectation is over the solutions produced by the algorithm when evaluated over the possible datasets in \(\mathcal D\); and</li>
+              <li> minimizes the mean squared error (or, equivalently, maximizes the <em>negative</em> of the MSE). Here, the expectation is over the solutions produced by the algorithm when evaluated over the possible datasets in \(\mathcal D\); and</li>
               <li> ensures that, with probability at least 0.9, the mean squared error of its predictions is below 2.0; and that with probability at least 0.9, the mean squared error if its predictions is above 1.25. </li>
             </ul>
           </p>
 
           <p align="justify">
-            In other words, the designer wishes to create an algorithm \(a\) that maximizes \(f(a)\) (where \(f(a)\) is the expected negative MSE) and that satisfies \(n=2\) behavioral constraints, \(g_1\) and \(g_2\), with probabilities \(1-\delta_1\) and \(1-\delta_2\), respectively. The behavioral constraints, then, are
+            In other words, the designer wishes to create an algorithm \(a\) that maximizes \(f(a)\) (where \(f(a)\) is the negative MSE) and that satisfies \(n=2\) behavioral constraints, \(g_1\) and \(g_2\), with probabilities \(1-\delta_1\) and \(1-\delta_2\), respectively. The behavioral constraints, then, are
             
             <ul>
               <li>\(g_1(\theta)=\operatorname{MSE}(\theta)-2.0\) and \(\delta_1=0.1\)</li>
@@ -140,7 +140,7 @@
               <li>A Seldonian algorithm \(a\) maximizes an objective function \(f\) and ensures that all behavioral constraints are satisfied.</li>
               <li>In this example we wish to create a linear regression algorithm that guarantees with probabiliy \(0.9\) that the MSE of its predictions is below \(2.0\) and with probability \(0.9\) that the MSE of its predictions is above \(1.25\)</li>
               <li>By <a href="https://en.wikipedia.org/wiki/Boole%27s_inequality">Boole's inequality</a>, this implies that with probability \(0.8\) the MSE of its predictions is in the interval \([1.25,2.0]\).</li>
-              <li>In our example, \(f(a)\) is the expected negative MSE of the solution that algorithm \(a\) will return for the user's application. We do not know the value of \(f(a)\) for any \(a\), as we do not know in advance the user's application when creating the algorithm.</li> 
+              <li>In our example, \(f(a)\) is the negative MSE of the solution that algorithm \(a\) will return for the user's application. We do not know the value of \(f(a)\) for any \(a\), as we do not know in advance the user's application when creating the algorithm.</li> 
               <li>Instead, we will require the user to provide a <em>sample objective function</em>, \(\hat f:\Theta \times \mathcal D \to \mathbb R\), such that \(\hat f(\theta,D)\) is an estimate of the utility of any algorithm that returns the solution \(\theta\) when given input data \(D\). In this example, \(\hat f\) is the <em>sample mean squared error</em>: \(\hat f(\theta,D)=\frac{1}{n}\sum_{i=1}^n (\hat y(X_i,\theta)-Y_i)^2\).</li>
               <li>We will test our algorithm on a simple data set where the inputs come from a standard normal distribution and the outputs are equal to the inputs, plus noise with a standard normal distribution.</li>
               <li>We will begin by using an interface that makes <em>creating</em> the Seldonian algorithm easier. Our initial interface will require the user to provide functions \(\hat g_i\). Later we will focus on interfaces that make it easier for users to <em>define and identify</em> undesirable behavior.</li>
