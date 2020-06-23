@@ -100,7 +100,7 @@
             $$
             In our example, the goal of the designer of the algorithm is to construct an algorithm that
             <ul>
-              <li> minimizes the mean squared error (or, equivalently, maximizes the <em>negative</em> of the MSE). Here, the expectation is over the solutions produced by the algorithm when evaluated over the possible datasets in \(\mathcal D\); and</li>
+              <li> minimizes the mean squared error (or, equivalently, maximizes the <em>negative</em> of the MSE); and</li>
               <li> ensures that, with probability at least 0.9, the mean squared error of its predictions is below 2.0; and that with probability at least 0.9, the mean squared error if its predictions is above 1.25. </li>
             </ul>
           </p>
@@ -116,7 +116,7 @@
 
           <p align="justify">
 
-          Because the algorithm does not have prior access to the distributions of \(X\) and \(Y\), it cannot compute MSE(\(\theta\)) analytically for any given candidate solution \(\theta\). More generally, because we do not know the user's application&mdash;to which datasets he or she will apply the algorithm&mdash;we cannot compute the value of \(f(a)\) for any \(a\). We can, however, define a <em>sample objective function</em>, \(\hat f\), that estimates the utility of a given algorithm, \(a\), when \(a\) returns the solution \(\theta\) given input data \(D\). In our particular example, the sample objective function \(\hat f\) is the <em>sample mean squared error</em> of a given candidate solution \(\theta\):
+          Because the algorithm does not have prior access to the distributions of \(X\) and \(Y\), it cannot compute \(MSE(\theta)\) analytically for any given candidate solution \(\theta\). More generally, because we do not know the user's application&mdash;to which datasets he or she will apply the algorithm&mdash;we cannot compute the value of \(f(a)\) for any \(a\). We can, however, define a <em>sample objective function</em>, \(\hat f\), that estimates the utility of a given algorithm, \(a\), when \(a\) returns the solution \(\theta\) given input data \(D\). In our particular example, the sample objective function \(\hat f\) is the <em>sample mean squared error</em> of a given candidate solution \(\theta\):
             $$
             \hat f(\theta,D)=-\frac{1}{n}\sum_{i=1}^n (\hat y(X_i,\theta)-Y_i)^2. 
             $$
