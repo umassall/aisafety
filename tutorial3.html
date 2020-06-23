@@ -90,7 +90,7 @@
               </li>
               <li align="justify"><b>Create the algorithm.</b> 
                 <p align="justify">
-                  We will implement the following algorithm.
+                  We will implement the following algorithm. 
                 </p>
 
                 <p align="justify">
@@ -110,6 +110,8 @@
                   </div>
                 </div>
 
+                <p align="justify"><a class="text-danger"><h4>A common misconception is that this algorithm is <i>the</i> Seldonian algorithm. There is no such thing, just as there is no one algorithm that is <i>the</i> reinforcement learning algorithm. This is one example of a simple Seldonian algorithm and a simple interface.</h4></a></p>
+
 
               </div>
             </div>
@@ -124,35 +126,35 @@
                   Remember that a Seldonian algorithm ensures that, for all \(i \in \{1,2,\dotsc,n\}\),
             $$\Pr(g_i(a(D))\leq 0)\geq 1-\delta_i.$$
                   
-                  The <em>Safety Test</em> mechanism needs to estimate whether \(\Pr(g_i(a(D))\leq 0)\geq 1-\delta_i\), for each \(g_i\). To determine if this is the case we will compute a high-confidence upper bound on each \(g_i(\theta)\) using a confidence interval derived from the Student \(t\)-statistic. If this high-confidence upper bound is less than or equal to zero for every behavioral constraint, then the candidate solution is safe to return; otherwise, the algorithm returns NSF. 
+                  The <em>Safety Test</em> mechanism is the component that ensures that these <em>behavioral constraints</em> hold. It does so using data, by computing a high-confidence upper bound on each \(g_i(\theta)\) using a confidence interval derived from the Student \(t\)-statistic. If this high-confidence upper bound is less than or equal to zero for every behavioral constraint, then the candidate solution will be returned (we often say colloquially that the "solution is safe to return"); otherwise, the algorithm returns NSF. 
                 </p>
 
                 <p align="justify">
-                  The high-confidence upper bound on each \(g_i(\theta)\) is computed as follows. Let \(X=(X_1,\dotsc,X_m)\) be independent and identically distributed random variables and assume that the data is normally distributed. Then we can use the Student \(t\)-statistic to compute an upper bound on the expected value of these random variables:
+                  The high-confidence upper bound on each \(g_i(\theta)\) is computed as follows. Let \(X=(X_1,\dotsc,X_m)\) be i.i.d. random variables. Under the assumption that \(\frac{1}{m}\sum_{i=1}^m X_i\) is normally distributed, we can use the Student \(t\)-statistic to compute an upper bound on the expected value of these random variables:
                   $$
-                  \Pr\left (\mathbf E[X_1] \leq \hat \mu(X) + \frac{\hat \sigma(X)}{\sqrt{m}}t_{1-\delta,m-1} \right ) \geq 1-\delta.
+                  \Pr\left (\mathbf E[X_1] \leq \hat \mu(X) + \frac{\hat \sigma(X)}{\sqrt{m}}t_{1-\delta,m-1} \right ) \geq 1-\delta,
                   $$
-
                   where 
                   <ul>
                     <li>\(\hat \mu(v)\) and \(\hat \sigma(v)\) are sample mean and sample standard deviation (with Bessel's correction) of a vector \(v\). That is, \(\hat  \mu(v)=1/|v|\sum_{i=1}^{|v|}v_i\) and \(\hat  \sigma(v)=\sqrt{(|v|-1)^{-1}\sum_{i=1}^{|v|}(v_i-\hat  \mu(v))^2}\), where \(|v|\) is the number of elements in \(v\); and </li>
-                    <li>\(t_{1-\delta,\nu}\) be the \(100(1-\delta)\) percentile of the Student \(t\)-distribution with \(\nu\) degrees of freedom, i.e., <kbd>tinv(\(1-\delta,\nu\))</kbd> in <a href="https://www.mathworks.com/help/stats/tinv.html">Matlab</a>.</li>
+                    <li>\(t_{1-\delta,\nu}\) is the \(100(1-\delta)\) percentile of the Student \(t\)-distribution with \(\nu\) degrees of freedom, i.e., <kbd>tinv(\(1-\delta,\nu\))</kbd> in <a href="https://www.mathworks.com/help/stats/tinv.html">Matlab</a>.</li>
                   </ul>
 
                   To construct the Safety Test mechanism, first remember that:
                   <ul>
-                    <li>\(D_2\) is the data being analyzed by the Safety Test;</li>
-                    <li>\(\hat g_{i}(\theta)=(\hat g_{i,1}(\theta, D_2), \ldots, \hat g_{i,m}(\theta, D_2))\) is a vector containing \(m\) i.i.d. values of \(g_{i}(\theta)\); and</li>
-                    <li>\(\mathbf E[\hat g_{i,j}(\theta,D_2)]=g_i(\theta)\).</li>
+                    <li>We will apply the safety test to a single solution, which we call the <em>candidate solution</em>, \(\theta_c\).</li>
+                    <li>\(D_2\) is the data used by the Safety Test;</li>
+                    <li>\(\hat g_{i}(\theta_c)=(\hat g_{i,1}(\theta_c, D_2), \ldots, \hat g_{i,m}(\theta_c, D_2))\) is a vector containing \(m\) i.i.d. values of \(g_{i}(\theta_c)\); and</li>
+                    <li>\(\mathbf E[\hat g_{i,j}(\theta_c,D_2)]=g_i(\theta_c)\).</li>
                   </ul>
 
-                  By substituting these in the high confidence upper bound discussed above, we have that
+                  By substituting these into the high confidence upper bound discussed above, we have that
 
                   $$
-                  \Pr\left (g_i(\theta) \leq \hat \mu(\hat g_i(\theta,D_2)) + \frac{\hat \sigma(\hat g_i(\theta,D_2))}{\sqrt{|D_2|}}t_{1-\delta_i,|D_2|-1} \right) \geq 1-\delta_i
+                  \Pr\left (g_i(\theta_c) \leq \hat \mu(\hat g_i(\theta_c,D_2)) + \frac{\hat \sigma(\hat g_i(\theta_c,D_2))}{\sqrt{|D_2|}}t_{1-\delta_i,|D_2|-1} \right) \geq 1-\delta_i.
                   $$
 
-                  This implies that, given a candidate solution \(\theta\) and dataset \(D_2\), we know that \(\left( \hat \mu(\hat g_i(\theta,D_2)) + \frac{\hat \sigma(\hat g_i(\theta,D_2))}{\sqrt{|D_2|}}t_{1-\delta_i,|D_2|-1} \right) \) is an upper bound on \(g_i(\theta)\). If this upper bound is less than or equal to zero, so is \(g_i(\theta)\), and the Safety Test can ensure, with high probability, that the \(i^\text{th}\) behavioral constraint is satisfied.
+                  This implies that, given a candidate solution \(\theta_c\) and dataset \(D_2\), \(\left( \hat \mu(\hat g_i(\theta_c,D_2)) + \frac{\hat \sigma(\hat g_i(\theta_c,D_2))}{\sqrt{|D_2|}}t_{1-\delta_i,|D_2|-1} \right) \) is a high-confidence upper bound on \(g_i(\theta_c)\). If this upper bound is less than or equal to zero, then \(g_i(\theta_c)\) is less than or equal to zero with high probability. So, the Safety Test can satisfy the behavioral constraint by only returning \(\theta_c\) when \(\left( \hat \mu(\hat g_i(\theta_c,D_2)) + \frac{\hat \sigma(\hat g_i(\theta_c,D_2))}{\sqrt{|D_2|}}t_{1-\delta_i,|D_2|-1} \right) \leq 0\).
                   </p>
                   <p align="justify">
 
@@ -170,28 +172,25 @@
                   <h2>Computing a Candidate Solution</h2>
                 
                 <p align="justify">
-
-                  If we can guarantee that only solutions that pass the Safety Test are returned by the algorithm, the algorithm will be Seldonian regardless of how those candidate solutions were computed. The only restriction here is that the candidate solutions cannot be computed using the same data set used in the safety test. This is the reason why the algorithm splits the training data \(D\) into two sets, \(D_1\) (used to compute a candidate solution) and \(D_2\) (used to perform the safety test).
+                  With the safety test in place, the algorithm will be Seldonian regardless of how the candidate solution is computed, as long as it is not computed using the data \(D_2\), which is used by the safety test. This is the reason why the algorithm splits the training data \(D\) into two sets, \(D_1\) (used to compute a candidate solution) and \(D_2\) (used to perform the safety test).
                 </p>
                 <p align="justify">
                   First, consider what would happen if we computed a candidate solution \(\theta_c\) as follows:
-                  $$\theta_c \in \arg\max_{\theta \in \Theta}\hat f(\theta,D_1)$$
+                  $$\theta_c \in \arg\max_{\theta \in \Theta}\hat f(\theta,D_1).$$
 
                   In this case, the candidate solution would be one that performs well according to the primary objective, \(\hat f\). However, this solution often will not be safe, and will fail the safety test, resulting in the algorithm returning NSF. To fix this, we want to select a candidate solution as follows:
 
                   $$\theta_c \in \arg\max_{\theta \in \Theta}\hat f(\theta,D_1)\\\text{s.t. $\theta_c$ predicted to pass safety test}.$$ 
 
-                  That is, we would like to only consider candidate solutions that we <em>predict</em> will pass the safety test. We can predict the result of the safety test by determining what it would return if it were to analyze the data set \(D_1\) (the data set used to compute the candidate solution) instead of \(D_2\):
+                  That is, we would like to only consider candidate solutions that we <em>predict</em> will pass the safety test. We can predict the result of the safety test by determining what it would return if it were to use the data set \(D_1\) (the data set used to compute the candidate solution) instead of \(D_2\):
 
                   $$\theta_c \in \arg\max_{\theta \in \Theta}\hat f(\theta,D_1)\\\text{s.t. }\forall i \in \{1,2,\dotsc,n\},\quad \hat \mu(\hat g_i(\theta,D_1)) + \frac{\hat \sigma(\hat g_i(\theta,D_1))}{\sqrt{|D_2|}}t_{1-\delta_i,|D_2|-1}\leq 0.$$
 
-                  Notice that the upper bound used above is identical to the one used in the Safety Test, except that the relevant statistics (mean \(\hat \mu\) and standard deviation \(\hat \sigma\)) are computed over the dataset \(D_1\), that is, the data set available to compute a candidate solution. 
+                  Notice that the upper bound used above is identical to the one used in the Safety Test, except that the relevant statistics (mean \(\hat \mu\) and standard deviation \(\hat \sigma\)) are computed over the dataset \(D_1\), that is, the data set available to compute a candidate solution. Also notice that we are still using the size of the <em>safety</em> data set in two locations above.
                   </p>
                   <p align="justify">
-                  Notice, furthermore, that as the second term in this upper bound \(\left(\frac{\hat \sigma(\hat g_i(\theta,D_1))}{\sqrt{|D_2|}}t_{1-\delta_i,|D_2|-1}\right)\) gets larger, so does the upper confidence itself, which means that algorithm will be less confident that the behavioral constraint function, \(g_i(\theta)\), is less than or equal to zero. When the primary ojective and the behavioral constraints are conflicting, we often observe that using this upper bound makes the candidate selection mechanism over-confident that the candidate solution will pass the safety test&mdash;likely due to over-fitting on the candidate data. To fix this and make the algorithm less confident/more conservative, we use a hack: we double the width of the confidence interval when predicting the outcome of the safety test, by multiplying the second term of the upper bound by two:
-
-                  $$\theta_c \in \arg\max_{\theta \in \Theta}\hat f(\theta,D_1)\\\text{s.t. }\forall i \in \{1,2,\dotsc,n\},\quad \hat \mu(\hat g_i(\theta,D_1)) + 2\frac{\hat \sigma(\hat g_i(\theta,D_1))}{\sqrt{|D_2|}}t_{1-\delta_i,|D_2|-1}\leq 0.$$
-
+                    The above method for computing the candidate solution can work well when the primary ojective and the behavioral constraints are aligned. However, when they are conflicting, the candidate selection mechanism tends to be over-confident that the candidate solution will pass the safety test (likely due to over-fitting on the candidate data). To fix this, we use a hack: we double the width of the confidence interval when predicting the outcome of the safety test, by multiplying the second term of the upper bound by two:
+                    $$\theta_c \in \arg\max_{\theta \in \Theta}\hat f(\theta,D_1)\\\text{s.t. }\forall i \in \{1,2,\dotsc,n\},\quad \hat \mu(\hat g_i(\theta,D_1)) + 2\frac{\hat \sigma(\hat g_i(\theta,D_1))}{\sqrt{|D_2|}}t_{1-\delta_i,|D_2|-1}\leq 0.$$
                 </p>
               </div>
             </div>
@@ -202,7 +201,7 @@
                 <div class="card-body">
                   <h2>A Complete Algorithm</h2>
                 <p align="justify">
-                  We can now define a complete algorithm by combining the two mechanisms introduced above:
+                  We can now present the complete algorithm by combining the two mechanisms introduced above:
                 </p>
 
               <div class="row bg-dark text-light">
