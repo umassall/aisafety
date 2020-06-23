@@ -116,7 +116,7 @@
 
           <p align="justify">
 
-          Because the algorithm does not have prior access to the distributions of \(X\) and \(Y\), it cannot compute \(MSE(\theta)\) analytically for any given candidate solution \(\theta\). More generally, because we do not know the user's application&mdash;to which datasets he or she will apply the algorithm&mdash;we cannot compute the value of \(f(a)\) for any \(a\). We can, however, define a <em>sample objective function</em>, \(\hat f\), that estimates the utility of a given algorithm, \(a\), when \(a\) returns the solution \(\theta\) given input data \(D\). In our particular example, the sample objective function \(\hat f\) is the <em>sample mean squared error</em> of a given candidate solution \(\theta\):
+          Because the algorithm does not have prior access to the distributions of \(X\) and \(Y\), it cannot compute \(\operatorname{MSE}(\theta)\) analytically for any given candidate solution \(\theta\). More generally, because we do not know the user's application&mdash;to which datasets he or she will apply the algorithm&mdash;we cannot compute the value of \(f(a)\) for any \(a\). We can, however, define a <em>sample objective function</em>, \(\hat f\), that estimates the utility of a given algorithm, \(a\), when \(a\) returns the solution \(\theta\) given input data \(D\). In our particular example, the sample objective function \(\hat f\) is the <em>sample mean squared error</em> of a given candidate solution \(\theta\):
             $$
             \hat f(\theta,D)=-\frac{1}{n}\sum_{i=1}^n (\hat y(X_i,\theta)-Y_i)^2. 
             $$
