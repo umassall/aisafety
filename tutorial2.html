@@ -123,10 +123,10 @@
             Furthermore, notice that the behavioral constraints, \(g_1\) and \(g_2\), are also defined in terms of the MSE, which cannot be computed exactly. This means that \(g_1\) and \(g_2\) cannot be computed analytically either. Instead of requiring the user to produce \(g_1\) and \(g_2\), we allow the user to specify functions \(\hat g_i\) that provide unbiased estimates of each corresponding constraint \(g_i\). In particular, each function \(\hat g_i(\theta,D)\) uses data to compute a vector of independent and identically distributed (i.i.d.) unbiased estimates of \(g_i(\theta)\). Let \(g_{i,j}(\theta,D)\) be the \(j^\text{th}\) unbiased estimate returned by \(\hat g_i(\theta,D)\). In our regression application, we compute these unbiased estimates of the behavioral constraints as follows:
             <ul>
               <li>\(\hat g_{1,j}(\theta,D) = (\hat y(X_j,\theta)-Y_j)^2-2.0\), and</li>
-              <li>\(\hat g_{2,j}(\theta,D) = 1.25-(\hat y(X_j,\theta)-Y_j)^2\)</li>
+              <li>\(\hat g_{2,j}(\theta,D) = 1.25-(\hat y(X_j,\theta)-Y_j)^2\).</li>
             </ul>
 
-            Notice that because \(g_{i,j}(\theta,D)\) are i.i.d. unbiased estimates of \(g_i\), for every \(i\) and \(j\), it follows that \(g_i(\theta)=\mathbf E[\hat g_{i,j}(\theta,D)]\).
+            Notice that because \(g_{i,j}(\theta,D)\) are i.i.d. unbiased estimates of \(g_i\), it follows that for every \(i\) and \(j\), \(g_i(\theta)=\mathbf E[\hat g_{i,j}(\theta,D)]\).
           </p>
         </div>
       </div>
@@ -145,7 +145,7 @@
               <li>We will test our algorithm on a simple data set where the inputs come from a standard normal distribution and the outputs are equal to the inputs, plus noise with a standard normal distribution.</li>
               <li>We will begin by using an interface that makes <em>creating</em> the Seldonian algorithm easier. Our initial interface will require the user to provide functions \(\hat g_i\). Later we will focus on interfaces that make it easier for users to <em>define and identify</em> undesirable behavior.</li>
               <li>Our example application was constructed to be simple, and yet also to test the ability of a Seldonian algorithm to handle behavioral constraints that may be in conflict with the objective function. Notice, for instance, that the solution that minimizes the MSE will violate the second behavioral constraint.</li>
-              <li>Once we have created a quasi-Seldonian algorithm for this problem, we will discuss how to create simpler interfaces to specify undesirable behavior and how to apply these ideas to the general regression and classification settings.</li>
+              <li>Once we have created a quasi-Seldonian algorithm for this problem, we will discuss how to create more powerful interfaces to specify undesirable behavior and how to apply these ideas to the general regression and classification settings.</li>
             </ul>
           </p>
 

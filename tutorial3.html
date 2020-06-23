@@ -75,7 +75,12 @@
             Remember that we are following the three steps of the Seldonian framework:
             <ol>
               <li>
-                <p align="justify"><b>Define the goal for the designer of the algorithm.</b> The goal is to create a regression algorithm \(a\) that minimizes the expected negative MSE of the solution that \(a\) returns for the user's application. Because we do not know the value of \(f(a)\) for any \(a\) (since we do not know, for instance, to which datasets the user will apply the algorithm), we allow the user to provide a sample objective function \(\hat f:\Theta \times \mathcal D \to \mathbb R\) that acts as an estimate of the utility of any algorithm that returns the solution \(\theta\), when given input data \(D\). In our case, \(\hat f(\theta,D)=\frac{1}{n}\sum_{i=1}^n (\hat y(X_i,\theta)-Y_i)^2\).
+                <p align="justify"><b>Define the goal for the designer of the algorithm.</b> Our goal is to create an algorithm \(a\) that attempts to maximize an objective function \(f\) and ensures that the behavioral constraints are satisfied. That is, we are searching for an algorithm \(a\) that is an approximate solution to:</p>
+                $$
+                \arg\max_{a \in \mathcal A}f(a)\\\text{s.t. }\forall i \in \{1,\dotsc,n\} \Pr(g_i(a(D)) \leq 0) \geq 1-\delta_i.
+                $$
+                <p>
+                In this example, the goal is to create a regression algorithm \(a\) that minimizes the negative MSE of the solution that \(a\) returns for the user's application. Because we do not know the value of \(f(a)\) for any \(a\) (since we do not know, for instance, to which datasets the user will apply the algorithm), we allow the user to provide a sample objective function \(\hat f:\Theta \times \mathcal D \to \mathbb R\) that acts as an estimate of the utility of any algorithm that returns the solution \(\theta\), when given input data \(D\). In our case, \(\hat f(\theta,D)=\frac{1}{n}\sum_{i=1}^n (\hat y(X_i,\theta)-Y_i)^2\).
                 </p>
               </li>
               <li>
